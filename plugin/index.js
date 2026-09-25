@@ -14,7 +14,8 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import os from "node:os";
 import path from "node:path";
 import { startRelayBridge } from "./relay-bridge.js";
-import { CHAIN_BLOCK_REASON, SETTINGS_BLOCK_REASON, commandText, isChainedCommand, touchesSafetySettings } from "./safety.js";
+import { CHAIN_BLOCK_REASON, SETTINGS_BLOCK_REASON, isChainedCommand, touchesSafetySettings } from "./safety.js";
+import { TITLE_MAX, clip, describe, describeCommand } from "./cards.js";
 
 // Tools that only look at things. Everything else needs a phone approval.
 const READ_ONLY_TOOLS = new Set([
@@ -32,8 +33,6 @@ const EXEC_TOOLS = new Set(["exec", "bash", "shell"]);
 // Background processes the AI started: looking is fine, stopping or typing into them is a change
 const PROCESS_READ_ACTIONS = new Set(["list", "poll", "log", "status"]);
 
-const TITLE_MAX = 80;   // plugin approval title limit
-const DESC_MAX = 480;   // stay under the 512-character description limit
 
 function defaultFolders() {
   const home = os.homedir();
@@ -45,8 +44,9 @@ function expandHome(p) {
   return p.startsWith("~") ? path.join(os.homedir(), p.slice(1)) : p;
 }
 
-/** Paths a tool call will touch: host-derived hints first, then common parameter names. */
-function targetPaths(event) {
+/** Paths a tool call will touch: host-derived hints first, then common parameter names.
+ *  Relative paths are resolved the way OpenClaw's tools do: from the run's folder (workspace). */
+function targetPaths(event, base) {
   const out = new Set(event.derivedPaths ?? []);
   const p = event.params ?? {};
   for (const key of ["path", "file_path", "filePath", "target", "destination", "dest", "to", "from", "source", "cwd", "workdir", "directory", "dir"]) {
@@ -55,33 +55,12 @@ function targetPaths(event) {
   for (const key of ["paths", "files"]) {
     if (Array.isArray(p[key])) for (const v of p[key]) if (typeof v === "string") out.add(v);
   }
-  return [...out].map((v) => path.resolve(expandHome(v)));
+  return [...out].map((v) => path.resolve(base, expandHome(v)));
 }
 
 function inside(child, parent) {
   const rel = path.relative(parent, child);
   return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
-}
-
-const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
-
-/** Command card: the exact command first (that is what the person approves), then where. */
-function describeCommand(event) {
-  const p = event.params ?? {};
-  const where = p.workdir ?? p.cwd;
-  return clip([`명령 / Command: ${commandText(p)}`, where ? `위치 / Folder: ${where}` : null].filter(Boolean).join("\n"), DESC_MAX);
-}
-
-/** Short, human card text: what will happen, to which files. */
-function describe(event, paths) {
-  const lines = [];
-  if (paths.length) lines.push(`대상 / Target: ${paths.slice(0, 5).join(", ")}${paths.length > 5 ? ` (+${paths.length - 5})` : ""}`);
-  const p = { ...(event.params ?? {}) };
-  for (const k of ["content", "contents", "text", "data", "body"]) {
-    if (typeof p[k] === "string") p[k] = `(${p[k].length} chars)`;
-  }
-  lines.push(clip(JSON.stringify(p), 300));
-  return clip(lines.join("\n"), DESC_MAX);
 }
 
 export default definePluginEntry({
@@ -90,11 +69,14 @@ export default definePluginEntry({
   description: "Phone approval for every change, allowed folders only, and Haru's default skills.",
   register(api) {
     const cfg = api.pluginConfig ?? {};
+    // Haru's own workspace (notes, drafts) is always allowed, wherever the installer put it
+    const workspace = api.config?.agents?.defaults?.workspace;
     const folders = (Array.isArray(cfg.allowedFolders) && cfg.allowedFolders.length ? cfg.allowedFolders : defaultFolders())
+      .concat(typeof workspace === "string" && workspace ? [workspace] : [])
       .map((f) => path.resolve(expandHome(String(f))));
     const readOnly = cfg.readOnly === true;
 
-    api.on("before_tool_call", (event) => {
+    api.on("before_tool_call", (event, ctx) => {
       const tool = String(event.toolName ?? "");
       if (READ_ONLY_TOOLS.has(tool)) return;
       if (tool === "process" && PROCESS_READ_ACTIONS.has(String(event.params?.action ?? ""))) return;
@@ -103,7 +85,8 @@ export default definePluginEntry({
         return { block: true, blockReason: "Haru PC is in read-only mode, so it can look but not change anything. (하루 PC 가 읽기 전용이라 바꿀 수 없어요)" };
       }
 
-      const paths = targetPaths(event);
+      const base = ctx?.cwd ?? ctx?.workspaceDir ?? workspace ?? process.cwd();
+      const paths = targetPaths(event, path.resolve(expandHome(String(base))));
       const outside = paths.filter((p) => !folders.some((f) => inside(p, f)));
       if (outside.length) {
         return {
@@ -122,7 +105,7 @@ export default definePluginEntry({
       return {
         requireApproval: {
           title: clip(EXEC_TOOLS.has(tool) ? "하루 PC · 명령 실행" : `하루 PC · ${tool}`, TITLE_MAX),
-          description: EXEC_TOOLS.has(tool) ? describeCommand(event) : describe(event, paths),
+          description: EXEC_TOOLS.has(tool) ? describeCommand(event.params) : describe(tool, event.params, paths),
           severity: "warning",
           allowedDecisions: ["allow-once", "deny"], // no "always allow" — every change is approved on the phone
           timeoutMs: 10 * 60_000,
