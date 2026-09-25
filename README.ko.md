@@ -59,6 +59,10 @@
   - **클라우드 모델**: 이미 쓰고 있는 ChatGPT, Claude, GitHub Copilot 구독으로 로그인하거나, API 키를 사용해요(예: Gemini). 품질이 가장 좋아요.
   - 내 컴퓨터에서 돌아가는 **로컬 모델**(llama.cpp 또는 [Ollama](https://ollama.com)). 무료이고 완전히 비공개지만 느려요. RAM 16GB라면 파라미터 약 9B 모델이 현실적인 한계예요. 안전을 위해, 작은 로컬 모델에는 설정을 바꾸지 않는 한 읽기 전용 스킬만 주어져요.
 
+### 추천 구성
+
+하루 PC를 두기에 가장 편한 곳은 **Mac mini**(또는 늘 켜 두는 컴퓨터)예요. 전기를 적게 쓰고, 모니터 없이도 돌아가며, RAM이 16GB 이상이면 무료 로컬 모델까지 돌릴 수 있어요. 휴대폰의 하루 앱과 한 번만 페어링하고 켜 두기만 하면 돼요.
+
 ---
 
 ## 설치
@@ -78,7 +82,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 설치 프로그램은 다음 순서로 진행돼요.
 1. 필요하면 Node.js를 설치한 뒤, 검증을 거쳐 버전을 고정한 OpenClaw를 설치해요.
 2. 하루 PC 플러그인과 기본 스킬을 추가해요.
-3. 안전한 설정을 적용해요. 명령 실행 승인 필수, 암호화 연결(TLS), 로컬 네트워크 검색 켜기, 공개 스킬 마켓플레이스 끄기.
+3. 안전한 설정을 적용해요. 명령 실행 승인 필수, 암호화 연결(TLS), 로컬 네트워크 검색 켜기.
 4. 하루 PC가 백그라운드에서 자동으로 시작되도록 등록해요(macOS는 launchd, Windows는 예약된 작업, Linux는 `systemd --user` 서비스).
 5. AI 모델 선택을 도와준 뒤, 페어링용 QR 코드를 보여 줘요.
 
@@ -132,6 +136,10 @@ haru-pc model                 # 현재 모델 보기
 
 로그인 정보와 키는 운영체제의 보안 저장소(키체인, Windows 자격 증명 관리자, Linux의 libsecret)에 보관돼요. 휴대폰이나 저희에게 전송되는 일은 절대 없어요.
 
+### 중국 본토에서는
+
+OpenAI, Anthropic, Google은 중국 본토에서 모델을 제공하지 않아요. 대신 현지에서 쓸 수 있는 제공사를 고르세요. 예를 들어 DeepSeek, Qwen(Alibaba), Kimi(Moonshot), Doubao(Volcano Engine), ERNIE(Baidu Qianfan), MiniMax, Zhipu GLM 등을 `haru-pc model key <provider>`로 연결하면 돼요. 인터넷 없이도 동작하는 로컬 모델을 `haru-pc model local`로 쓰는 방법도 있어요.
+
 ---
 
 ## 스킬
@@ -154,7 +162,7 @@ haru-pc skills disable browser
 | `browser` | 정보를 찾아보고 페이지를 비교해요. **기본값은 꺼짐이에요.** 결제는 절대 하지 않고, 묻지 않고 로그인하지 않아요 |
 | `routines` | 정해진 일정에 따라 작업을 실행해요("매주 월요일 9시") |
 
-하루 PC는 자체 검토를 거친 스킬만 사용해요. 공개 마켓플레이스의 스킬은 꺼져 있어요.
+하루 PC에는 자체 검토를 거친 스킬이 함께 들어 있고, 공개 마켓플레이스의 스킬을 스스로 설치하는 일은 없어요. 무언가를 새로 설치하려면 휴대폰에서 승인해야 해요.
 
 직접 스킬을 만들 수도 있어요. [docs/skills.md](docs/skills.md)를 참고하세요.
 

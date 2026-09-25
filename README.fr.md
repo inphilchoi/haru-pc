@@ -59,6 +59,10 @@ Les compétences peuvent être ajoutées, activées ou désactivées. Voir [Comp
   - **Modèle cloud :** connectez-vous avec un abonnement ChatGPT, Claude ou GitHub Copilot que vous avez déjà, ou utilisez une clé d'API (par exemple Gemini). C'est l'option qui offre la meilleure qualité.
   - **Modèle local** exécuté sur votre ordinateur (llama.cpp ou [Ollama](https://ollama.com)). Il est gratuit et entièrement privé, mais plus lent. Avec 16 Go de RAM, un modèle d'environ 9 milliards de paramètres est la limite en pratique. Par sécurité, les petits modèles locaux n'ont accès qu'à des compétences en lecture seule, sauf si vous modifiez ce réglage.
 
+### Configuration conseillée
+
+Un **Mac mini** (ou tout ordinateur allumé en permanence) est l'endroit idéal pour Haru PC : il consomme peu, fonctionne sans écran et, avec 16 Go de RAM ou plus, peut aussi faire tourner un modèle local gratuit. Appairez-le une fois avec l'app Haru sur votre téléphone, puis laissez-le allumé.
+
 ---
 
 ## Installation
@@ -78,7 +82,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 Le programme d'installation :
 1. installe Node.js si nécessaire, puis une version testée et figée d'OpenClaw,
 2. ajoute le plugin Haru PC et ses compétences par défaut,
-3. applique des réglages sûrs : approbation obligatoire des commandes, connexions chiffrées (TLS), découverte sur le réseau local activée et marketplace publique de compétences désactivée,
+3. applique des réglages sûrs : approbation obligatoire des commandes, connexions chiffrées (TLS) et découverte sur le réseau local activée,
 4. configure Haru PC pour qu'il démarre en arrière-plan (launchd sous macOS, tâche planifiée sous Windows, service `systemd --user` sous Linux),
 5. vous aide à choisir un modèle d'IA, puis affiche un QR code d'appairage.
 
@@ -132,6 +136,10 @@ haru-pc model                 # affiche le modèle actuel
 
 Les connexions et les clés sont conservées dans le stockage sécurisé de votre système d'exploitation (Trousseau, Gestionnaire d'identification Windows ou libsecret sous Linux). Elles ne sont jamais envoyées à votre téléphone, ni à nous.
 
+### En Chine continentale
+
+OpenAI, Anthropic et Google ne proposent pas leurs modèles en Chine continentale. Choisissez plutôt un fournisseur disponible sur place, par exemple DeepSeek, Qwen (Alibaba), Kimi (Moonshot), Doubao (Volcano Engine), ERNIE (Baidu Qianfan), MiniMax ou Zhipu GLM, avec `haru-pc model key <provider>`, ou utilisez un modèle local avec `haru-pc model local`, qui fonctionne sans accès à internet.
+
 ---
 
 ## Compétences
@@ -154,7 +162,7 @@ Compétences par défaut :
 | `browser` | Faire des recherches et comparer des pages. **Désactivée par défaut.** Ne paie jamais et ne se connecte jamais à un compte sans vous le demander |
 | `routines` | Exécuter une tâche selon un planning (« tous les lundis à 9 h ») |
 
-Haru PC n'utilise que ses propres compétences, relues et vérifiées. Les compétences issues des marketplaces publiques sont désactivées.
+Haru PC est livré avec ses propres compétences, relues et vérifiées, et n'installe jamais de lui-même des compétences issues des marketplaces publiques. Toute nouvelle installation doit être approuvée sur votre téléphone.
 
 Vous pouvez aussi écrire votre propre compétence. Voir [docs/skills.md](docs/skills.md).
 

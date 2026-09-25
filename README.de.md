@@ -59,6 +59,10 @@ Skills lassen sich hinzufügen sowie ein- und ausschalten. Siehe [Skills](#skill
   - **Cloud-Modell:** Melden Sie sich mit einem bereits vorhandenen ChatGPT-, Claude- oder GitHub-Copilot-Abonnement an, oder verwenden Sie einen API-Schlüssel (zum Beispiel für Gemini). Das liefert die beste Qualität.
   - **Lokales Modell**, das auf Ihrem Computer läuft (llama.cpp oder [Ollama](https://ollama.com)). Es ist kostenlos und vollständig privat, aber langsamer. Mit 16 GB RAM liegt die praktische Grenze bei einem Modell mit etwa 9 Mrd. Parametern. Aus Sicherheitsgründen erhalten kleine lokale Modelle nur Skills mit Lesezugriff, sofern Sie das nicht ändern.
 
+### Empfohlene Einrichtung
+
+Am bequemsten läuft Haru PC auf einem **Mac mini** (oder einem anderen Computer, der ständig eingeschaltet ist): Er verbraucht wenig Strom, läuft ohne Bildschirm und kann mit 16 GB RAM oder mehr auch ein kostenloses lokales Modell ausführen. Koppeln Sie ihn einmal mit der Haru-App auf Ihrem Smartphone und lassen Sie ihn eingeschaltet.
+
 ---
 
 ## Installation
@@ -78,7 +82,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 Das Installationsprogramm:
 1. installiert bei Bedarf Node.js und anschließend eine getestete, fest vorgegebene OpenClaw-Version,
 2. fügt das Haru-PC-Plugin und seine Standard-Skills hinzu,
-3. übernimmt sichere Einstellungen: Freigabe für Befehle erforderlich, verschlüsselte Verbindungen (TLS), Erkennung im lokalen Netzwerk aktiv und öffentlicher Skill-Marktplatz deaktiviert,
+3. übernimmt sichere Einstellungen: Freigabe für Befehle erforderlich, verschlüsselte Verbindungen (TLS) und Erkennung im lokalen Netzwerk aktiv,
 4. registriert Haru PC für den Start im Hintergrund (launchd unter macOS, eine geplante Aufgabe unter Windows, ein `systemd --user`-Dienst unter Linux),
 5. hilft Ihnen bei der Wahl eines KI-Modells und zeigt anschließend einen QR-Code zum Koppeln an.
 
@@ -132,6 +136,10 @@ haru-pc model                 # aktuelles Modell anzeigen
 
 Anmeldungen und Schlüssel werden im sicheren Speicher Ihres Betriebssystems abgelegt (Schlüsselbund, Windows-Anmeldeinformationsverwaltung oder libsecret unter Linux). Sie werden niemals an Ihr Smartphone oder an uns gesendet.
 
+### In Festlandchina
+
+OpenAI, Anthropic und Google bieten ihre Modelle in Festlandchina nicht an. Wählen Sie stattdessen einen dort verfügbaren Anbieter, zum Beispiel DeepSeek, Qwen (Alibaba), Kimi (Moonshot), Doubao (Volcano Engine), ERNIE (Baidu Qianfan), MiniMax oder Zhipu GLM, mit `haru-pc model key <provider>`, oder nutzen Sie mit `haru-pc model local` ein lokales Modell, das ohne Internetzugang funktioniert.
+
 ---
 
 ## Skills
@@ -154,7 +162,7 @@ Standard-Skills:
 | `browser` | Informationen nachschlagen und Seiten vergleichen. **Standardmäßig aus.** Bezahlt nie und meldet sich nie ohne Rückfrage an |
 | `routines` | Eine Aufgabe nach Zeitplan ausführen („jeden Montag um 9 Uhr“) |
 
-Haru PC verwendet ausschließlich eigene, geprüfte Skills. Skills aus öffentlichen Marktplätzen sind deaktiviert.
+Haru PC bringt eigene, geprüfte Skills mit und installiert niemals von sich aus Skills aus öffentlichen Marktplätzen. Jede neue Installation müssen Sie auf dem Smartphone freigeben.
 
 Sie können auch eigene Skills schreiben. Siehe [docs/skills.md](docs/skills.md).
 

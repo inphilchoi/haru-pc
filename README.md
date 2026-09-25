@@ -59,6 +59,10 @@ Skills can be added and switched on or off. See [Skills](#skills).
   - **Cloud model:** sign in with a ChatGPT, Claude, or GitHub Copilot subscription you already have, or use an API key (for example Gemini). This gives the best quality.
   - **Local model** that runs on your computer (llama.cpp or [Ollama](https://ollama.com)). It's free and fully private but slower. With 16 GB of RAM, a model of about 9B parameters is the practical limit. For safety, small local models get read-only skills unless you change it.
 
+### Recommended setup
+
+A **Mac mini** (or any always-on computer) is the most comfortable home for Haru PC: it uses little power, runs without a screen, and with 16 GB of RAM or more it can also run a free local model. Pair it once with the Haru app on your phone and leave it on.
+
 ---
 
 ## Install
@@ -78,7 +82,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 The installer:
 1. installs Node.js if needed, then a tested, pinned version of OpenClaw,
 2. adds the Haru PC plugin and its default skills,
-3. applies safe settings: command approval required, encrypted connections (TLS), local-network discovery on, and the public skill marketplace off,
+3. applies safe settings: command approval required, encrypted connections (TLS), and local-network discovery on,
 4. registers Haru PC to start in the background (launchd on macOS, a scheduled task on Windows, a `systemd --user` service on Linux),
 5. helps you choose an AI model, then shows a pairing QR code.
 
@@ -132,6 +136,10 @@ haru-pc model                 # show the current model
 
 Sign-ins and keys are kept in your operating system's secure storage (Keychain, Windows Credential Manager, or libsecret on Linux). They're never sent to your phone or to us.
 
+### In mainland China
+
+OpenAI, Anthropic and Google don't offer their models in mainland China. Choose a provider available there instead — for example DeepSeek, Qwen (Alibaba), Kimi (Moonshot), Doubao (Volcano Engine), ERNIE (Baidu Qianfan), MiniMax or Zhipu GLM — with `haru-pc model key <provider>`, or use a local model with `haru-pc model local`, which works without internet access.
+
 ---
 
 ## Skills
@@ -154,7 +162,7 @@ Default skills:
 | `browser` | Look things up and compare pages. **Off by default.** Never pays, never logs in without asking |
 | `routines` | Run a task on a schedule ("every Monday at 9") |
 
-Haru PC only uses its own reviewed skills. Skills from public marketplaces are turned off.
+Haru PC comes with its own reviewed skills and never installs skills from public marketplaces by itself. Installing anything new needs your approval on the phone.
 
 You can also write your own skill. See [docs/skills.md](docs/skills.md).
 

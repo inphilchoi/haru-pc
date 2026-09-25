@@ -59,6 +59,10 @@ Haru PC 在開放原始碼的個人 AI 助理 [OpenClaw](https://github.com/open
   - **雲端模型**：使用你已訂閱的 ChatGPT、Claude 或 GitHub Copilot 登入，或使用 API 金鑰（例如 Gemini）。品質最好。
   - 在你電腦上執行的**本機模型**（llama.cpp 或 [Ollama](https://ollama.com)）。免費且完全私密，但速度較慢。以 16 GB 記憶體來說，約 9B 參數的模型就是實際可用的上限。基於安全考量，除非你自行變更，小型本機模型只能使用唯讀技能。
 
+### 建議配置
+
+最適合擺放 Haru PC 的是一台 **Mac mini**（或任何一直開著的電腦）：耗電少、不接螢幕也能運作，記憶體 16 GB 以上還能執行免費的本機模型。用手機上的 Haru App 配對一次，之後讓它保持開機即可。
+
 ---
 
 ## 安裝
@@ -78,7 +82,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 安裝程式會：
 1. 視需要安裝 Node.js，接著安裝經過測試並鎖定版本的 OpenClaw；
 2. 加入 Haru PC 外掛程式及其預設技能；
-3. 套用安全設定：執行指令須經核准、使用加密連線（TLS）、開啟區域網路探索、關閉公開技能市集；
+3. 套用安全設定：執行指令須經核准、使用加密連線（TLS）、開啟區域網路探索；
 4. 將 Haru PC 註冊為在背景自動啟動（macOS 使用 launchd，Windows 使用排程工作，Linux 使用 `systemd --user` 服務）；
 5. 協助你選擇 AI 模型，然後顯示配對用的 QR 碼。
 
@@ -132,6 +136,10 @@ haru-pc model                 # 顯示目前的模型
 
 登入資訊與金鑰會存放在作業系統的安全儲存區（鑰匙圈、Windows 認證管理員，或 Linux 上的 libsecret），絕不會傳送到你的手機，也不會傳給我們。
 
+### 在中國大陸
+
+OpenAI、Anthropic 和 Google 並未在中國大陸提供模型服務。請改選在當地可用的服務商，例如深度求索 DeepSeek、通義千問（阿里雲）、Kimi（月之暗面）、豆包（火山引擎）、文心（百度千帆）、MiniMax 或智譜 GLM，並用 `haru-pc model key <provider>` 連接；也可以用 `haru-pc model local` 執行本機模型，不需連上網際網路也能使用。
+
 ---
 
 ## 技能
@@ -154,7 +162,7 @@ haru-pc skills disable browser
 | `browser` | 查詢資料、比較網頁。**預設為關閉。** 絕不付款，未經詢問也絕不登入 |
 | `routines` | 依排程執行工作（「每週一早上 9 點」） |
 
-Haru PC 只使用經過我們自行審查的技能，來自公開市集的技能一律關閉。
+Haru PC 內建經過我們自行審查的技能，絕不會自行安裝來自公開市集的技能。要安裝任何新東西，都需要你在手機上核准。
 
 你也可以自己撰寫技能，詳見 [docs/skills.md](docs/skills.md)。
 
