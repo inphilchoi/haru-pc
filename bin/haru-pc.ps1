@@ -13,7 +13,8 @@ $a1 = if ($Args_.Count -gt 1) { $Args_[1] } else { '' }
 $a2 = if ($Args_.Count -gt 2) { $Args_[2] } else { '' }
 
 switch ($cmd) {
-  'pair'    { Oc qr }
+  # One code for everything: setup code + the encrypted relay (works away from home too). Plain `openclaw qr` only works on the same Wi-Fi.
+  'pair'    { $env:HARU_PC_HOME = $HaruHome; $env:HARU_PC_PROFILE = $Profile_; & node (Join-Path $HaruHome 'app\plugin\pair.mjs') @($Args_ | Select-Object -Skip 1) }
   'approve' { Oc devices approve --latest }
   'unpair'  { Oc devices list; $id = Read-Host 'Device id to remove'; Oc devices remove $id }
   'status'  { Oc gateway status; Oc devices list }

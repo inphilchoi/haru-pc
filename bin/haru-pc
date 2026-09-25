@@ -58,7 +58,9 @@ EOF
 
 cmd="${1:-help}"; shift || true
 case "$cmd" in
-  pair)      oc qr ;;
+  # One code for everything: this computer's setup code + the encrypted relay (works away from home too).
+  # (Plain `openclaw qr` only works on the same Wi-Fi.)
+  pair)      HARU_PC_HOME="$HARU_HOME" HARU_PC_PROFILE="$PROFILE" node "$HARU_HOME/app/plugin/pair.mjs" "$@" ;;
   approve)   oc devices approve --latest ;;
   unpair)    oc devices list; read -r -p "Device id to remove: " id; oc devices remove "$id" ;;
   status)    oc gateway status; oc devices list ;;
