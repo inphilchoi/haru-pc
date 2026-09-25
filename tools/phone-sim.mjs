@@ -17,7 +17,7 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) =>
   if (a.startsWith("--")) acc.push([a.slice(2), all[i + 1] && !all[i + 1].startsWith("--") ? all[i + 1] : true]);
   return acc;
 }, []));
-const STATE = path.join(os.homedir(), ".haru-pc-poc", "phone-sim.json");
+const STATE = path.join(os.homedir(), ".haru-pc", "phone-sim.json");
 const state = fs.existsSync(STATE) ? JSON.parse(fs.readFileSync(STATE, "utf8")) : {};
 const save = () => { fs.mkdirSync(path.dirname(STATE), { recursive: true }); fs.writeFileSync(STATE, JSON.stringify(state, null, 2), { mode: 0o600 }); };
 
