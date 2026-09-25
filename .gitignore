@@ -2,3 +2,8 @@
 .DS_Store
 node_modules/
 secrets/
+
+# local tool state (never publish)
+.wrangler/
+relay.json
+.haru-pc*/
