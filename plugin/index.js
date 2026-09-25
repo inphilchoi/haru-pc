@@ -15,6 +15,8 @@ const READ_ONLY_TOOLS = new Set([
   "image", "pdf", "session_status", "current",
   "docs_search", "memory_search", "active_memory_search",
   "agents_list", "conversations_list", "get_goal", "ask_user",
+  // OpenClaw's own bookkeeping (finding tools, yielding a turn) — changes nothing on the computer
+  "tool_search", "sessions_yield", "sessions_list", "sessions_history",
 ]);
 // Shell commands already go through OpenClaw's own exec approval (one card, not two).
 const EXEC_TOOLS = new Set(["exec", "process"]);
