@@ -8,6 +8,7 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import os from "node:os";
 import path from "node:path";
 import { startRelayBridge } from "./relay-bridge.js";
+import { SETTINGS_BLOCK_REASON, touchesSafetySettings } from "./safety.js";
 
 // Tools that only look at things. Everything else needs a phone approval.
 const READ_ONLY_TOOLS = new Set([
@@ -93,7 +94,14 @@ export default definePluginEntry({
         };
       }
 
-      if (EXEC_TOOLS.has(tool)) return; // OpenClaw's exec approval shows the exact command on the phone
+      if (EXEC_TOOLS.has(tool)) {
+        // The AI must never widen its own limits (seen in testing: after a block it tried
+        // `haru-pc allow …`). Safety settings are changed only by the person, on the computer.
+        if (touchesSafetySettings(event.params)) {
+          return { block: true, blockReason: SETTINGS_BLOCK_REASON };
+        }
+        return; // OpenClaw's exec approval shows the exact command on the phone
+      }
 
       return {
         requireApproval: {

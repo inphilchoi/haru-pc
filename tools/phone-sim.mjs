@@ -5,6 +5,8 @@
 //   node tools/phone-sim.mjs --url ws://127.0.0.1:18789 --setup <설정 코드>   # 처음 (QR 속 코드)
 //   node tools/phone-sim.mjs --url ws://127.0.0.1:18789 --say "바탕화면 파일 목록 알려 줘"
 //   --approve  : 승인 요청이 오면 자동으로 allow-once (없으면 터미널에서 y/n)
+//   --leave-after <ms> : 일을 보내고 그 시간 뒤 연결을 끊는다 (앱을 닫은 폰 흉내)
+//   --listen   : 일을 보내지 않고 붙어서, 기다리던 승인 카드(목록)와 답을 받는다 (다시 연 폰 흉내)
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -136,6 +138,20 @@ async function onChallenge({ nonce, ts }) {
     console.log(`연결됨: 서버 ${hello.server?.version}, 권한 ${hello.auth?.role} [${(hello.auth?.scopes || []).join(", ")}]`);
     if (hello.auth?.deviceToken) { state.deviceToken = hello.auth.deviceToken; delete state.bootstrapToken; save(); console.log("기기 토큰 저장 (다음부터 이걸로 연결)"); }
     if (typeof args.say === "string") await sendTask(args.say);
+    if (args["leave-after"]) setTimeout(() => { console.log("(앱 닫음 흉내) 연결 끊음"); process.exit(0); }, Number(args["leave-after"]));
+    if (typeof args.history === "string") {
+      const h = await request("chat.history", { sessionKey: args.history, limit: 8 }).catch((e) => ({ error: e.message }));
+      for (const m of h?.messages ?? []) console.log(`[${m.role}]`, JSON.stringify(m.content ?? m.text ?? m).slice(0, 300));
+      if (h?.error) console.log("history 실패:", h.error);
+      process.exit(0);
+    }
+    if (args.listen) {
+      // 다시 연 폰: 그사이 쌓인 승인 요청을 목록으로 받아 카드로 띄운다
+      for (const [method, kind] of [["plugin.approval.list", "plugin.approval.requested"], ["exec.approval.list", "exec.approval.requested"]]) {
+        const list = await request(method, {}).catch(() => []);
+        for (const p of Array.isArray(list) ? list : list?.approvals ?? []) onApproval(kind, p);
+      }
+    }
   } catch (e) {
     if (e.detail?.retryable) {
       // 게이트웨이가 막 켜지는 중 — 잠깐 기다렸다가 다시 붙는다 (폰 앱도 같은 동작)
@@ -156,8 +172,11 @@ async function sendTask(text) {
   if (args.verbose) console.log("chat.send 응답:", JSON.stringify(res).slice(0, 300));
 }
 
+const seenApprovals = new Set();
 async function onApproval(kind, p) {
   const id = p.id ?? p.approvalId;
+  if (seenApprovals.has(id)) return;
+  seenApprovals.add(id);
   console.log(`\n[승인 카드] ${p.title ?? p.command ?? kind}\n  ${p.description ?? JSON.stringify(p).slice(0, 300)}`);
   let yes = args.approve === true;
   if (!yes) yes = (await rl.question("  한 번 허용할까요? (y/n) ")).trim().toLowerCase().startsWith("y");

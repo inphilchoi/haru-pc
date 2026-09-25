@@ -124,7 +124,10 @@ export class Room {
     } else {
       const pc = this.pc();
       const sid = this.tagSid(ws);
-      if (pc && sid) this.sendTo(pc, { t: "close", sid });
+      // A phone that reconnected replaces its old socket; that old socket closing late must not
+      // close the new session on the PC.
+      const replaced = sid && this.state.getWebSockets(`sid:${sid}`).some((o) => o !== ws && o.readyState === 1);
+      if (pc && sid && !replaced) this.sendTo(pc, { t: "close", sid });
     }
   }
 
