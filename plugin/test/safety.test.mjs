@@ -22,3 +22,14 @@ test("ordinary commands are not caught", () => {
   }
   assert.equal(touchesSafetySettings({}), false);
 });
+
+test("only one plain command at a time", async () => {
+  const { isChainedCommand } = await import("../safety.js");
+  for (const command of [
+    "ls | wc -l", "cd ~ && rm -rf x", "date; whoami", "echo hi > ~/Desktop/a.txt", "cat < /etc/passwd",
+    "echo $(whoami)", "echo `id`", "sleep 5 &", "echo \"$(rm -rf ~)\"", "ls\nrm -rf ~",
+  ]) assert.equal(isChainedCommand({ command }), true, command);
+  for (const command of ["ls -A ~/Desktop", "date", "echo 'a | b'", 'echo "x > y"', "find ~/Downloads -name '*.pdf'"]) {
+    assert.equal(isChainedCommand({ command }), false, command);
+  }
+});

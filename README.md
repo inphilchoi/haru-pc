@@ -202,7 +202,7 @@ Your settings stay in `~/.haru-pc` until you delete that folder.
 | The phone can't find the PC | Check that both are on the same Wi-Fi, or both are signed in to Tailscale. Then run `haru-pc status` |
 | Pairing QR expired | Run `haru-pc pair` again |
 | Tasks are slow | A local model on a small machine is slow. Sign in to a subscription with `haru-pc model login chatgpt` or `haru-pc model login claude` |
-| An approval card never appeared | Approvals reach your phone while the Haru app is open. If a request isn't answered within 10 minutes, Haru PC declines it and nothing runs. Open Haru and ask again |
+| An approval card never appeared | You can close Haru after handing off a task: Haru PC keeps working for up to 15 minutes, and waiting approval cards appear when you open Haru again. If a request isn't answered within 10 minutes, Haru PC declines it and nothing runs. Open Haru and ask again |
 | Something went wrong | Run `haru-pc logs` and attach the output to an issue |
 
 ---

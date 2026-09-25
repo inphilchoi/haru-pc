@@ -202,7 +202,7 @@ Suas configurações ficam em `~/.haru-pc` até você apagar essa pasta.
 | O celular não encontra o PC | Verifique se os dois estão na mesma rede Wi-Fi ou se ambos estão conectados ao Tailscale. Depois, execute `haru-pc status` |
 | O QR code de pareamento expirou | Execute `haru-pc pair` novamente |
 | As tarefas estão lentas | Um modelo local em uma máquina modesta é lento. Entre com uma assinatura usando `haru-pc model login chatgpt` ou `haru-pc model login claude` |
-| O cartão de aprovação não apareceu | Os pedidos de aprovação chegam ao celular enquanto o app Haru está aberto. Se um pedido não for respondido em 10 minutos, o Haru PC o recusa e nada é executado. Abra o Haru e peça de novo |
+| O cartão de aprovação não apareceu | Depois de passar uma tarefa, você pode fechar o Haru: o Haru PC continua trabalhando por até 15 minutos, e os cartões de aprovação pendentes aparecem quando você abre o Haru de novo. Se um pedido não for respondido em 10 minutos, o Haru PC o recusa e nada é executado. Abra o Haru e peça de novo |
 | Algo deu errado | Execute `haru-pc logs` e anexe a saída a uma issue |
 
 ---

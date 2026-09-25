@@ -202,7 +202,7 @@ Ihre Einstellungen bleiben in `~/.haru-pc`, bis Sie diesen Ordner löschen.
 | Das Smartphone findet den PC nicht | Prüfen Sie, ob beide Geräte im selben WLAN oder beide bei Tailscale angemeldet sind. Führen Sie dann `haru-pc status` aus |
 | QR-Code zum Koppeln abgelaufen | Führen Sie `haru-pc pair` erneut aus |
 | Aufgaben dauern lange | Ein lokales Modell auf einem leistungsschwachen Rechner ist langsam. Melden Sie sich mit `haru-pc model login chatgpt` oder `haru-pc model login claude` bei einem Abonnement an |
-| Es ist keine Freigabekarte erschienen | Freigabeanfragen erreichen Ihr Smartphone, während die Haru-App geöffnet ist. Wird eine Anfrage nicht innerhalb von 10 Minuten beantwortet, lehnt Haru PC sie ab und es wird nichts ausgeführt. Öffnen Sie Haru und stellen Sie die Anfrage erneut |
+| Es ist keine Freigabekarte erschienen | Nachdem Sie eine Aufgabe übergeben haben, können Sie die Haru-App schließen: Haru PC arbeitet bis zu 15 Minuten weiter, und wartende Freigabekarten erscheinen, sobald Sie Haru wieder öffnen. Wird eine Anfrage nicht innerhalb von 10 Minuten beantwortet, lehnt Haru PC sie ab und es wird nichts ausgeführt. Öffnen Sie Haru und stellen Sie die Anfrage erneut |
 | Etwas ist schiefgelaufen | Führen Sie `haru-pc logs` aus und hängen Sie die Ausgabe an ein Issue an |
 
 ---

@@ -1,14 +1,20 @@
 // Haru PC plugin for OpenClaw.
 //
 // Haru PC's safety rule: nothing changes on the computer until the person approves it
-// on their phone. OpenClaw already asks for shell commands (tools.exec.mode = "ask");
-// this plugin asks for every other tool that can change something, keeps changes inside
-// the folders the person allowed, and blocks changes entirely in read-only mode.
+// on their phone. This plugin asks — one card per change — for every tool that can change
+// something, shell commands included, for every AI runtime (local model, API key, and
+// Claude/Codex logins alike). It keeps changes inside the folders the person allowed,
+// approves only one plain command at a time, and blocks changes entirely in read-only mode.
+//
+// Why the plugin and not OpenClaw's own exec approval: with a Claude login (claude-cli
+// runtime) OpenClaw's native-tool approval is sent as if the phone itself asked, so it is
+// never shown on the phone and every command failed. The installer therefore sets
+// tools.exec.mode = full and leaves the asking to this plugin.
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import os from "node:os";
 import path from "node:path";
 import { startRelayBridge } from "./relay-bridge.js";
-import { SETTINGS_BLOCK_REASON, touchesSafetySettings } from "./safety.js";
+import { CHAIN_BLOCK_REASON, SETTINGS_BLOCK_REASON, commandText, isChainedCommand, touchesSafetySettings } from "./safety.js";
 
 // Tools that only look at things. Everything else needs a phone approval.
 const READ_ONLY_TOOLS = new Set([
@@ -18,9 +24,13 @@ const READ_ONLY_TOOLS = new Set([
   "agents_list", "conversations_list", "get_goal", "ask_user",
   // OpenClaw's own bookkeeping (finding tools, yielding a turn) — changes nothing on the computer
   "tool_search", "sessions_yield", "sessions_list", "sessions_history",
+  // Claude/Codex runtime's own planning list — stays inside the AI
+  "todo_write",
 ]);
-// Shell commands already go through OpenClaw's own exec approval (one card, not two).
-const EXEC_TOOLS = new Set(["exec", "process"]);
+// Shell commands (OpenClaw's exec, Claude's Bash)
+const EXEC_TOOLS = new Set(["exec", "bash", "shell"]);
+// Background processes the AI started: looking is fine, stopping or typing into them is a change
+const PROCESS_READ_ACTIONS = new Set(["list", "poll", "log", "status"]);
 
 const TITLE_MAX = 80;   // plugin approval title limit
 const DESC_MAX = 480;   // stay under the 512-character description limit
@@ -39,7 +49,7 @@ function expandHome(p) {
 function targetPaths(event) {
   const out = new Set(event.derivedPaths ?? []);
   const p = event.params ?? {};
-  for (const key of ["path", "file_path", "filePath", "target", "destination", "dest", "to", "from", "source", "cwd", "directory", "dir"]) {
+  for (const key of ["path", "file_path", "filePath", "target", "destination", "dest", "to", "from", "source", "cwd", "workdir", "directory", "dir"]) {
     if (typeof p[key] === "string" && p[key]) out.add(p[key]);
   }
   for (const key of ["paths", "files"]) {
@@ -54,6 +64,13 @@ function inside(child, parent) {
 }
 
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+
+/** Command card: the exact command first (that is what the person approves), then where. */
+function describeCommand(event) {
+  const p = event.params ?? {};
+  const where = p.workdir ?? p.cwd;
+  return clip([`명령 / Command: ${commandText(p)}`, where ? `위치 / Folder: ${where}` : null].filter(Boolean).join("\n"), DESC_MAX);
+}
 
 /** Short, human card text: what will happen, to which files. */
 function describe(event, paths) {
@@ -80,6 +97,7 @@ export default definePluginEntry({
     api.on("before_tool_call", (event) => {
       const tool = String(event.toolName ?? "");
       if (READ_ONLY_TOOLS.has(tool)) return;
+      if (tool === "process" && PROCESS_READ_ACTIONS.has(String(event.params?.action ?? ""))) return;
 
       if (readOnly) {
         return { block: true, blockReason: "Haru PC is in read-only mode, so it can look but not change anything. (하루 PC 가 읽기 전용이라 바꿀 수 없어요)" };
@@ -97,16 +115,14 @@ export default definePluginEntry({
       if (EXEC_TOOLS.has(tool)) {
         // The AI must never widen its own limits (seen in testing: after a block it tried
         // `haru-pc allow …`). Safety settings are changed only by the person, on the computer.
-        if (touchesSafetySettings(event.params)) {
-          return { block: true, blockReason: SETTINGS_BLOCK_REASON };
-        }
-        return; // OpenClaw's exec approval shows the exact command on the phone
+        if (touchesSafetySettings(event.params)) return { block: true, blockReason: SETTINGS_BLOCK_REASON };
+        if (isChainedCommand(event.params)) return { block: true, blockReason: CHAIN_BLOCK_REASON };
       }
 
       return {
         requireApproval: {
-          title: clip(`하루 PC · ${tool}`, TITLE_MAX),
-          description: describe(event, paths),
+          title: clip(EXEC_TOOLS.has(tool) ? "하루 PC · 명령 실행" : `하루 PC · ${tool}`, TITLE_MAX),
+          description: EXEC_TOOLS.has(tool) ? describeCommand(event) : describe(event, paths),
           severity: "warning",
           allowedDecisions: ["allow-once", "deny"], // no "always allow" — every change is approved on the phone
           timeoutMs: 10 * 60_000,

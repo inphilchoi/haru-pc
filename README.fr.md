@@ -202,7 +202,7 @@ Vos réglages restent dans `~/.haru-pc` tant que vous ne supprimez pas ce dossie
 | Le téléphone ne trouve pas le PC | Vérifiez que les deux appareils sont sur le même Wi-Fi, ou tous deux connectés à Tailscale. Exécutez ensuite `haru-pc status` |
 | Le QR code d'appairage a expiré | Exécutez de nouveau `haru-pc pair` |
 | Les tâches sont lentes | Un modèle local sur une machine modeste est lent. Connectez-vous à un abonnement avec `haru-pc model login chatgpt` ou `haru-pc model login claude` |
-| Aucune carte d'approbation n'est apparue | Les demandes d'approbation arrivent sur votre téléphone lorsque l'application Haru est ouverte. Si une demande reste sans réponse pendant 10 minutes, Haru PC la refuse et rien ne s'exécute. Ouvrez Haru et redemandez |
+| Aucune carte d'approbation n'est apparue | Vous pouvez fermer Haru après avoir confié une tâche : Haru PC continue jusqu'à 15 minutes, et les cartes d'approbation en attente s'affichent quand vous rouvrez Haru. Si une demande reste sans réponse pendant 10 minutes, Haru PC la refuse et rien ne s'exécute. Ouvrez Haru et redemandez |
 | Quelque chose s'est mal passé | Exécutez `haru-pc logs` et joignez la sortie à une issue |
 
 ---

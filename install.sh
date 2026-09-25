@@ -63,10 +63,17 @@ say "Applying safe settings…"
 oc config set gateway.mode local >/dev/null
 oc config set gateway.bind lan >/dev/null              # your Wi-Fi only; never the public internet
 oc config set gateway.tls.enabled true >/dev/null      # encrypted connection (self-signed, pinned by the app)
-oc config set tools.exec.mode ask >/dev/null           # every shell command is approved on the phone
 oc config set agents.defaults.workspace "$HARU_HOME/workspace" >/dev/null
 oc plugins enable bonjour >/dev/null 2>&1 || true      # lets the Haru app find this computer on the same Wi-Fi
 oc plugins install --force "$HARU_HOME/app/plugin" >/dev/null   # Haru PC safety plugin + skills (reviewed source)
+# Commands are approved by the Haru PC plugin (one card on the phone, works with Claude logins too).
+# Only switch OpenClaw's own asking off once the plugin is really installed and enabled.
+if oc plugins list 2>/dev/null | grep -q "haru-pc"; then
+  oc config set tools.exec.mode full >/dev/null
+else
+  oc config set tools.exec.mode ask >/dev/null
+  say "Haru PC safety plugin is not active — commands will use OpenClaw's own approval. Run the installer again to fix."
+fi
 
 # ---- 4. AI model -----------------------------------------------------------------------------
 if [ -z "$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n')" ]; then

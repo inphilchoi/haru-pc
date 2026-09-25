@@ -53,10 +53,13 @@ Say "Applying safe settings…"
 Oc config set gateway.mode local | Out-Null
 Oc config set gateway.bind lan | Out-Null            # your Wi-Fi only; never the public internet
 Oc config set gateway.tls.enabled true | Out-Null    # encrypted connection
-Oc config set tools.exec.mode ask | Out-Null         # every command is approved on the phone
 Oc config set agents.defaults.workspace (Join-Path $HaruHome 'workspace') | Out-Null
 try { Oc plugins enable bonjour | Out-Null } catch {}  # same-Wi-Fi discovery (Windows needs it on explicitly)
 Oc plugins install --force (Join-Path $app 'plugin') | Out-Null
+# Commands are approved by the Haru PC plugin (one card on the phone, works with Claude logins too).
+# Only switch OpenClaw's own asking off once the plugin is really installed.
+if ((& openclaw --profile $Profile_ plugins list 2>$null) -match 'haru-pc') { Oc config set tools.exec.mode full | Out-Null }
+else { Oc config set tools.exec.mode ask | Out-Null; Write-Warning "Haru PC safety plugin is not active - commands use OpenClaw's own approval. Run the installer again to fix." }
 
 # 4. AI model
 $model = (& openclaw --profile $Profile_ config get agents.defaults.model.primary 2>$null) -replace '[\s"{}]', ''

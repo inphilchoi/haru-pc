@@ -202,7 +202,7 @@ haru-pc uninstall    # 停止背景服務並移除 Haru PC
 | 手機找不到電腦 | 確認兩者連上同一個 Wi-Fi，或都已登入 Tailscale，然後執行 `haru-pc status` |
 | 配對 QR 碼已過期 | 重新執行 `haru-pc pair` |
 | 工作執行得很慢 | 在效能較低的電腦上，本機模型會比較慢。可以用 `haru-pc model login chatgpt` 或 `haru-pc model login claude` 登入訂閱方案 |
-| 一直沒收到核准卡片 | 核准請求只會在 Haru App 開啟時送達手機。如果請求在 10 分鐘內沒有得到回應，Haru PC 會自動拒絕，不會執行任何動作。請開啟 Haru 再說一次 |
+| 一直沒收到核准卡片 | 交代工作後可以關閉 Haru App：Haru PC 會繼續處理最多 15 分鐘，重新開啟 Haru 時，等待中的核准卡片就會出現。如果請求在 10 分鐘內沒有得到回應，Haru PC 會自動拒絕，不會執行任何動作。請開啟 Haru 再說一次 |
 | 發生其他問題 | 執行 `haru-pc logs`，並將輸出內容附加到 Issue 中 |
 
 ---
