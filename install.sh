@@ -65,7 +65,7 @@ oc config set gateway.bind lan >/dev/null              # your Wi-Fi only; never 
 oc config set gateway.tls.enabled true >/dev/null      # encrypted connection (self-signed, pinned by the app)
 oc config set agents.defaults.workspace "$HARU_HOME/workspace" >/dev/null
 oc plugins enable bonjour >/dev/null 2>&1 || true      # lets the Haru app find this computer on the same Wi-Fi
-oc plugins install --force "$HARU_HOME/app/plugin" >/dev/null   # Haru PC safety plugin + skills (reviewed source)
+oc plugins install --force --accept-capabilities "$HARU_HOME/app/plugin" >/dev/null   # Haru PC safety plugin + skills (reviewed source, published in this repo)
 # Commands are approved by the Haru PC plugin (one card on the phone, works with Claude logins too).
 # Only switch OpenClaw's own asking off once the plugin is really installed and enabled.
 if oc plugins list 2>/dev/null | grep -q "haru-pc"; then
