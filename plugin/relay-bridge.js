@@ -10,7 +10,7 @@ import path from "node:path";
 import WebSocket from "ws";
 
 export const RELAY_FILE = path.join(process.env.HARU_PC_HOME || path.join(os.homedir(), ".haru-pc"), "relay.json");
-export const DEFAULT_RELAY_URL = "wss://haru-relay.creativelab.workers.dev";
+export const DEFAULT_RELAY_URL = "wss://haru-relay.creativelab-choi.workers.dev";
 
 const b64u = (buf) => Buffer.from(buf).toString("base64url");
 const unb64u = (s) => Buffer.from(s, "base64url");

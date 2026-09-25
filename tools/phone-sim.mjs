@@ -152,7 +152,7 @@ async function onChallenge({ nonce, ts }) {
 
 async function sendTask(text) {
   console.log(`\n[폰 → PC] ${text}`);
-  const res = await request("chat.send", { sessionKey: "haru-phone", message: text, idempotencyKey: crypto.randomUUID() });
+  const res = await request("chat.send", { sessionKey: typeof args.session === "string" ? args.session : "haru-phone", message: text, idempotencyKey: crypto.randomUUID() });
   if (args.verbose) console.log("chat.send 응답:", JSON.stringify(res).slice(0, 300));
 }
 
