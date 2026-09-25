@@ -57,7 +57,7 @@ Oc config set agents.defaults.workspace (Join-Path $HaruHome 'workspace') | Out-
 try { Oc plugins enable bonjour | Out-Null } catch {}  # same-Wi-Fi discovery (Windows needs it on explicitly)
 # The plugin's own libraries (ws for the relay, qrcode for the pairing code) - exact versions from package-lock.json
 Push-Location (Join-Path $app 'plugin')
-try { & npm ci --omit=dev --omit=peer --no-audit --no-fund --loglevel=error | Out-Null; if ($LASTEXITCODE -ne 0) { throw "npm ci failed" } }
+try { & npm install --omit=dev --omit=peer --legacy-peer-deps --no-save --no-audit --no-fund --loglevel=error | Out-Null; if ($LASTEXITCODE -ne 0) { throw "npm install failed" } }
 catch { throw "Couldn't install Haru PC's libraries (npm). Check your internet connection and run the installer again." }
 finally { Pop-Location }
 Oc plugins install --force --accept-capabilities (Join-Path $app 'plugin') | Out-Null   # reviewed source, published in this repo

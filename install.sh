@@ -66,7 +66,7 @@ oc config set gateway.tls.enabled true >/dev/null      # encrypted connection (s
 oc config set agents.defaults.workspace "$HARU_HOME/workspace" >/dev/null
 oc plugins enable bonjour >/dev/null 2>&1 || true      # lets the Haru app find this computer on the same Wi-Fi
 # The plugin's own libraries (ws for the relay, qrcode for the pairing code) — exact versions from package-lock.json
-(cd "$HARU_HOME/app/plugin" && npm ci --omit=dev --omit=peer --no-audit --no-fund --loglevel=error >/dev/null) \
+(cd "$HARU_HOME/app/plugin" && npm install --omit=dev --omit=peer --legacy-peer-deps --no-save --no-audit --no-fund --loglevel=error >/dev/null) \
   || fail "Couldn't install Haru PC's libraries (npm). Check your internet connection and run the installer again."
 oc plugins install --force --accept-capabilities "$HARU_HOME/app/plugin" >/dev/null   # Haru PC safety plugin + skills (reviewed source, published in this repo)
 # Commands are approved by the Haru PC plugin (one card on the phone, works with Claude logins too).
