@@ -1,0 +1,22 @@
+{
+  "name": "haru-pc-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Haru PC: phone-approval safety layer, Korean assistant persona and default skills for OpenClaw",
+  "type": "module",
+  "license": "MIT",
+  "peerDependencies": {
+    "openclaw": ">=2026.9.6"
+  },
+  "openclaw": {
+    "extensions": ["./index.js"],
+    "compat": {
+      "pluginApi": ">=2026.9.6",
+      "minGatewayVersion": "2026.9.6"
+    },
+    "build": {
+      "openclawVersion": "2026.9.6",
+      "pluginSdkVersion": "2026.9.6"
+    }
+  }
+}

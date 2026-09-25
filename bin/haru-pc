@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# haru-pc — everyday commands for Haru PC (a thin layer over OpenClaw with the "haru" profile).
+# Sign-ins and keys are entered by YOU on the provider's page or prompt; this script never asks for passwords.
+set -euo pipefail
+
+HARU_HOME="${HARU_PC_HOME:-$HOME/.haru-pc}"
+PROFILE="${HARU_PC_PROFILE:-haru}"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.npm-global/bin:/opt/homebrew/bin:/usr/local/bin"
+oc() { openclaw --profile "$PROFILE" "$@"; }
+say() { printf '\033[1;35m하루 PC\033[0m %s\n' "$*"; }
+
+usage() {
+  cat <<'EOF'
+Haru PC — ask Haru on your phone, your computer does the work.
+
+  haru-pc pair                 show a pairing QR code for the Haru app (valid 10 minutes, one use)
+  haru-pc approve              approve the phone that is waiting to connect
+  haru-pc unpair               disconnect a paired phone
+  haru-pc status               is Haru PC running? which phones are paired?
+  haru-pc logs                 recent log lines (attach these to a GitHub issue)
+
+  haru-pc model                show the current AI model
+  haru-pc model choose         choose a model (menu)
+  haru-pc model login chatgpt  sign in with your ChatGPT plan (OpenAI's own page)
+  haru-pc model login claude   use your Claude plan (after `claude auth login`)
+  haru-pc model login copilot  sign in with GitHub Copilot
+  haru-pc model key <provider> use an API key: openai, anthropic, gemini, mistral, deepseek…
+  haru-pc model local          free local model on this computer
+
+  haru-pc allow <folder>       let Haru PC work in another folder
+  haru-pc readonly on|off      block every change (recommended with small local models)
+  haru-pc skills [enable|disable <name>]
+  haru-pc remote on|off        reach Haru PC away from home through your own Tailscale
+  haru-pc update               update to the next tested version
+  haru-pc uninstall            stop and remove Haru PC (settings stay in ~/.haru-pc)
+EOF
+}
+
+model_choose() {
+  cat <<'EOF'
+Which AI should Haru PC use?
+  1) ChatGPT — sign in with your ChatGPT plan
+  2) Claude — use your Claude plan (Claude app must be signed in on this computer)
+  3) GitHub Copilot — sign in
+  4) API key — OpenAI, Anthropic, Gemini (free key), Mistral, DeepSeek…
+  5) Local model — free, private, slower (16 GB RAM or more recommended)
+EOF
+  read -r -p "Choose 1-5: " n
+  case "$n" in
+    1) "$0" model login chatgpt ;;
+    2) "$0" model login claude ;;
+    3) "$0" model login copilot ;;
+    4) read -r -p "Provider (openai, anthropic, gemini, mistral, deepseek, …): " p; "$0" model key "$p" ;;
+    5) "$0" model local ;;
+    *) say "Skipped. Run: haru-pc model choose" ;;
+  esac
+}
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  pair)      oc qr ;;
+  approve)   oc devices approve --latest ;;
+  unpair)    oc devices list; read -r -p "Device id to remove: " id; oc devices remove "$id" ;;
+  status)    oc gateway status; oc devices list ;;
+  logs)      oc logs --limit 200 2>/dev/null || oc logs ;;
+
+  model)
+    sub="${1:-show}"; shift || true
+    case "$sub" in
+      show)   oc config get agents.defaults.model ;;
+      choose) model_choose ;;
+      login)
+        case "${1:-}" in
+          chatgpt) say "OpenAI's sign-in page will open. Enter your ID and password there, not here."
+                   oc models auth login --provider openai ;;
+          claude)  if ! command -v claude >/dev/null || ! claude auth status >/dev/null 2>&1; then
+                     say "First sign in to Claude's official app: run  claude auth login  (you enter your details on Anthropic's page)."
+                     exit 1
+                   fi
+                   oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice anthropic-cli \
+                     --workspace "$HARU_HOME/workspace"
+                   say "Claude connected. Your Claude plan's limits apply. Please check Anthropic's current terms for using your plan with other tools." ;;
+          copilot) oc models auth login-github-copilot ;;
+          *) say "Use: haru-pc model login chatgpt|claude|copilot"; exit 2 ;;
+        esac ;;
+      key)
+        p="${1:-}"; [ -n "$p" ] || { say "Use: haru-pc model key <provider>"; exit 2; }
+        say "Paste your $p API key when asked. It's stored in this computer's secure storage."
+        oc onboard --auth-choice "${p}-api-key" --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace" ;;
+      local)
+        oc plugins install @openclaw/llama-cpp-provider --accept-capabilities >/dev/null 2>&1 || true
+        oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace"
+        say "Small local models are easier to trick, so Haru PC turns on read-only mode. Turn it off with: haru-pc readonly off"
+        oc config set plugins.entries.haru-pc.config.readOnly true >/dev/null ;;
+      *) usage; exit 2 ;;
+    esac ;;
+
+  allow)
+    f="${1:-}"; [ -d "$f" ] || { say "Folder not found: $f"; exit 2; }
+    f="$(cd "$f" && pwd)"
+    cur="$(oc config get plugins.entries.haru-pc.config.allowedFolders 2>/dev/null || echo '[]')"
+    new="$(printf '%s' "$cur" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{let a=[];try{a=JSON.parse(s)}catch{};if(!Array.isArray(a)||!a.length){const h=require("os").homedir();a=["Documents","Downloads","Desktop"].map(d=>h+"/"+d).concat(h+"/.haru-pc/workspace")}if(!a.includes(process.argv[1]))a.push(process.argv[1]);console.log(JSON.stringify(a))})' "$f")"
+    oc config set plugins.entries.haru-pc.config.allowedFolders "$new" --json >/dev/null && say "Haru PC may now work in: $f" ;;
+  readonly)
+    case "${1:-}" in on) v=true ;; off) v=false ;; *) say "Use: haru-pc readonly on|off"; exit 2 ;; esac
+    oc config set plugins.entries.haru-pc.config.readOnly "$v" --json >/dev/null && say "Read-only: ${1}" ;;
+  skills)
+    case "${1:-list}" in
+      list) oc skills list ;;
+      enable|disable) oc config set "skills.entries.${2:?skill name}.enabled" "$([ "$1" = enable ] && echo true || echo false)" --json >/dev/null && say "${2}: ${1}d" ;;
+      *) say "Use: haru-pc skills [enable|disable <name>]"; exit 2 ;;
+    esac ;;
+  remote)
+    case "${1:-}" in
+      on)  command -v tailscale >/dev/null || { say "Install Tailscale first: https://tailscale.com/download"; exit 1; }
+           oc config set gateway.tailscale.mode serve >/dev/null && oc gateway restart >/dev/null && say "Reachable inside your tailnet only. Pair again with: haru-pc pair --remote" ;;
+      off) oc config set gateway.tailscale.mode off >/dev/null && oc gateway restart >/dev/null && say "Remote access off." ;;
+      *) say "Use: haru-pc remote on|off"; exit 2 ;;
+    esac ;;
+  update)    curl -fsSL https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.sh | bash ;;
+  uninstall) oc gateway uninstall || true; rm -f "$HOME/.local/bin/haru-pc"; rm -rf "$HARU_HOME/app"
+             say "Removed. Your settings and workspace are still in $HARU_HOME and ~/.openclaw-$PROFILE — delete them to remove everything." ;;
+  help|-h|--help) usage ;;
+  *) usage; exit 2 ;;
+esac
