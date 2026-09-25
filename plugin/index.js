@@ -7,6 +7,7 @@
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import os from "node:os";
 import path from "node:path";
+import { startRelayBridge } from "./relay-bridge.js";
 
 // Tools that only look at things. Everything else needs a phone approval.
 const READ_ONLY_TOOLS = new Set([
@@ -102,5 +103,21 @@ export default definePluginEntry({
         },
       };
     }, { priority: 100 });
+
+    // Reach this computer from anywhere through the end-to-end encrypted Haru relay
+    // (see relay-bridge.js). Started with the gateway, stopped when it drains.
+    let stopRelay = null;
+    api.on("gateway_start", (_event, ctx) => {
+      if (ctx?.abortSignal?.aborted || stopRelay) return;
+      const gw = api.config?.gateway ?? {};
+      const port = gw.port ?? 18789;
+      const scheme = gw.tls?.enabled ? "wss" : "ws";
+      stopRelay = startRelayBridge({
+        gatewayUrl: `${scheme}://127.0.0.1:${port}`,
+        signal: ctx?.abortSignal,
+        log: (m) => api.logger?.info?.(`[haru-relay] ${m}`),
+      });
+    });
+    api.on("gateway_stop", () => { stopRelay?.(); stopRelay = null; });
   },
 });

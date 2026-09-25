@@ -32,20 +32,63 @@ const rawPub = Buffer.from(state.publicKeyRaw.replace(/-/g, "+").replace(/_/g, "
 const deviceId = crypto.createHash("sha256").update(rawPub).digest("hex");
 const privateKey = crypto.createPrivateKey(state.privateKeyPem);
 
-// 설정 코드 = base64url(JSON {url, bootstrapToken, expiresAtMs})
+// 설정 코드 = base64url(JSON {url, bootstrapToken, expiresAtMs}), 또는 하루 코드 "haru1." + base64url({v, s:설정코드, r:중계})
 if (typeof args.setup === "string") {
-  const setup = JSON.parse(Buffer.from(args.setup.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
+  let code = args.setup;
+  if (code.startsWith("haru1.")) {
+    const h = JSON.parse(Buffer.from(code.slice(6), "base64url").toString("utf8"));
+    state.relay = h.r ?? null; code = h.s; delete state.relaySid;
+  }
+  const setup = JSON.parse(Buffer.from(code.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
   state.url = setup.url; state.bootstrapToken = setup.bootstrapToken; save();
   console.log("설정 코드 읽음:", setup.url, "만료", new Date(setup.expiresAtMs).toLocaleString());
 }
 const url = typeof args.url === "string" ? args.url : state.url;
-if (!url) { console.error("--url 또는 --setup 이 필요해요"); process.exit(1); }
+if (!url && !args.relay) { console.error("--url 또는 --setup 이 필요해요"); process.exit(1); }
 
 const client = { id: "gateway-client", displayName: "하루 (phone-sim)", version: "0.1.0", platform: "ios", deviceFamily: "iphone", mode: "ui", timeZone: "Asia/Seoul" };
 const role = "operator";
 const scopes = ["operator.read", "operator.write", "operator.approvals"];
 
-const ws = new WebSocket(url);
+// --relay: reach the PC through the encrypted Haru relay instead of the local address
+// (what the Haru app does away from home). Relay details come from the "haru1." pairing code.
+let ws;
+if (args.relay) {
+  const r = state.relay;
+  if (!r) { console.error("relay 정보가 없어요 — haru1. 코드로 --setup 해 주세요"); process.exit(1); }
+  const sid = state.relaySid ??= crypto.randomBytes(12).toString("base64url"); save();
+  const key = Buffer.from(r.k, "base64url");
+  const aad = (dir) => Buffer.from(`haru1|${r.room}|${sid}|${dir}`);
+  const sealF = (text) => {
+    const nonce = crypto.randomBytes(12);
+    const c = crypto.createCipheriv("chacha20-poly1305", key, nonce, { authTagLength: 16 });
+    c.setAAD(aad("p2c"));
+    const ct = Buffer.concat([c.update(Buffer.from(text)), c.final()]);
+    return Buffer.concat([nonce, ct, c.getAuthTag()]).toString("base64url");
+  };
+  const openF = (d) => {
+    const b = Buffer.from(d, "base64url");
+    const dc = crypto.createDecipheriv("chacha20-poly1305", key, b.subarray(0, 12), { authTagLength: 16 });
+    dc.setAAD(aad("c2p")); dc.setAuthTag(b.subarray(b.length - 16));
+    return Buffer.concat([dc.update(b.subarray(12, b.length - 16)), dc.final()]).toString("utf8");
+  };
+  const raw = new WebSocket(`${r.u.replace(/\/$/, "")}/r/${r.room}?role=phone&sid=${sid}&token=${encodeURIComponent(r.t)}`);
+  // Present the relay like a normal gateway socket to the rest of this script.
+  const listeners = { message: [], close: [], error: [] };
+  ws = {
+    send: (text) => raw.send(JSON.stringify({ t: "msg", d: sealF(text) })),
+    addEventListener: (type, fn) => listeners[type]?.push(fn),
+  };
+  raw.addEventListener("message", (ev) => {
+    const f = JSON.parse(ev.data);
+    if (f.t === "pc") { console.log(f.online ? "(중계) PC 온라인" : "(중계) PC 오프라인"); return; }
+    if (f.t === "msg") { try { const data = openF(f.d); listeners.message.forEach((fn) => fn({ data })); } catch { console.error("(중계) 복호화 실패한 조각 버림"); } }
+  });
+  raw.addEventListener("close", (e) => listeners.close.forEach((fn) => fn(e)));
+  raw.addEventListener("error", (e) => listeners.error.forEach((fn) => fn(e)));
+} else {
+  ws = new WebSocket(url);
+}
 let seq = 0;
 const pending = new Map();
 const request = (method, params) => new Promise((resolve, reject) => {

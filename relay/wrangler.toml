@@ -1,0 +1,13 @@
+# Haru relay — forwards end-to-end encrypted frames between the Haru app and Haru PC.
+# It never sees plaintext (the key is only in the pairing QR) and stores nothing but a hash of each room's access token.
+name = "haru-relay"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
