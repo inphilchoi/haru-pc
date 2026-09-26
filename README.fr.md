@@ -101,6 +101,8 @@ Vous préférez lire le script avant de l'exécuter ? Téléchargez [`install.sh
 
 **Utilisation hors de chez vous :** rien à configurer. Le code d'association contient déjà le relais Haru chiffré : l'application atteint Haru PC où que vous soyez. Haru PC n'ouvre jamais de port sur l'internet public. (Si vous préférez votre propre réseau [Tailscale](https://tailscale.com), `haru-pc remote on` fonctionne toujours.)
 
+**Vous préférez ne pas utiliser notre relais ?** Choisissez **Connexion directe (auto-hébergée)** à l'installation, ou exécutez `haru-pc relay off`. Le téléphone se connecte alors directement à votre ordinateur sur le même Wi-Fi ; hors de chez vous, utilisez votre propre Tailscale (`haru-pc remote on`) ou votre propre relais (`haru-pc relay url wss://…`). Voir [docs/self-host-relay.md](docs/self-host-relay.md).
+
 ---
 
 ## Choisir votre modèle d'IA

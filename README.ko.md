@@ -101,6 +101,8 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 
 **집 밖에서 쓰려면:** 따로 할 일이 없어요. 연결 코드에 암호화된 하루 중계가 들어 있어서 어디서든 하루 PC에 닿아요. 하루 PC는 공용 인터넷에 포트를 절대 열지 않아요. (내 [Tailscale](https://tailscale.com) 네트워크를 쓰고 싶다면 `haru-pc remote on`도 그대로 쓸 수 있어요.)
 
+**저희 중계를 쓰고 싶지 않다면:** 설치할 때 **직접 연결(설치형)**을 고르거나 `haru-pc relay off`를 실행하세요. 그러면 같은 Wi-Fi에서 휴대폰이 컴퓨터에 직접 연결되고, 집 밖에서는 내 Tailscale(`haru-pc remote on`)이나 내가 운영하는 중계(`haru-pc relay url wss://…`)를 쓰면 돼요. 자세한 방법: [docs/self-host-relay.md](docs/self-host-relay.md)
+
 ---
 
 ## AI 모델 고르기

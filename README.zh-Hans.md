@@ -101,6 +101,8 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 
 **在外面使用：** 无需任何设置。连接码里已经包含加密的 Haru 中继，在哪里都能连到 Haru PC。Haru PC 绝不会向公网开放端口。（如果想用你自己的 [Tailscale](https://tailscale.com) 网络，`haru-pc remote on` 仍然可用。）
 
+**不想使用我们的中继？** 安装时选择 **直接连接（自托管）**，或运行 `haru-pc relay off`。这样在同一个 Wi-Fi 下手机直接连到电脑；在外面可以用你自己的 Tailscale（`haru-pc remote on`），或自己运营的中继（`haru-pc relay url wss://…`）。详见 [docs/self-host-relay.md](docs/self-host-relay.md)。
+
 ---
 
 ## 选择 AI 模型

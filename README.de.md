@@ -101,6 +101,8 @@ Möchten Sie das Skript zuerst lesen? Laden Sie [`install.sh`](install.sh) oder 
 
 **Nutzung unterwegs:** Nichts einzurichten. Der Kopplungscode enthält bereits das verschlüsselte Haru-Relay, sodass die App Haru PC von überall erreicht. Haru PC öffnet niemals einen Port zum öffentlichen Internet. (Wer lieber sein eigenes [Tailscale](https://tailscale.com)-Netzwerk nutzt, kann weiterhin `haru-pc remote on` verwenden.)
 
+**Sie möchten unser Relay nicht nutzen?** Wählen Sie bei der Installation **Direkt (selbst gehostet)** oder führen Sie `haru-pc relay off` aus. Dann verbindet sich das Smartphone im selben WLAN direkt mit Ihrem Computer; unterwegs nutzen Sie Ihr eigenes Tailscale (`haru-pc remote on`) oder Ihr eigenes Relay (`haru-pc relay url wss://…`). Siehe [docs/self-host-relay.md](docs/self-host-relay.md).
+
 ---
 
 ## KI-Modell wählen

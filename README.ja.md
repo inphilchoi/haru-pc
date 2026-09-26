@@ -101,6 +101,8 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 
 **外出先から使うには:** 特別な設定は不要です。接続コードに暗号化された Haru 中継が含まれているので、どこからでも Haru PC に届きます。Haru PC がインターネットに向けてポートを開くことはありません。（ご自身の [Tailscale](https://tailscale.com) ネットワークを使いたい場合は、`haru-pc remote on` も引き続き使えます。）
 
+**私たちの中継を使いたくない場合:** インストール時に **直接接続（セルフホスト）** を選ぶか、`haru-pc relay off` を実行してください。同じ Wi-Fi ではスマホがパソコンに直接つながり、外出先ではご自身の Tailscale（`haru-pc remote on`）か、ご自身で運用する中継（`haru-pc relay url wss://…`）を使えます。詳しくは [docs/self-host-relay.md](docs/self-host-relay.md)。
+
 ---
 
 ## AI モデルを選ぶ

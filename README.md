@@ -101,6 +101,8 @@ Prefer to read the script first? Download [`install.sh`](install.sh) or [`instal
 
 **Using it away from home:** nothing to set up. The pairing code already includes the encrypted Haru relay, so the app reaches Haru PC from anywhere. Haru PC never opens a port to the public internet. (If you'd rather use your own [Tailscale](https://tailscale.com) network, `haru-pc remote on` still works.)
 
+**Prefer not to use our relay?** Choose **Direct (self-hosted)** during install, or run `haru-pc relay off`. The phone then connects straight to your computer on the same Wi-Fi; away from home use your own Tailscale (`haru-pc remote on`) or run your own relay (`haru-pc relay url wss://…`). See [docs/self-host-relay.md](docs/self-host-relay.md).
+
 ---
 
 ## Choose your AI model

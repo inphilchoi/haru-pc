@@ -66,6 +66,21 @@ Oc plugins install --force --accept-capabilities (Join-Path $app 'plugin') | Out
 if ((& openclaw --profile $Profile_ plugins list 2>$null) -match 'haru-pc') { Oc config set tools.exec.mode full | Out-Null }
 else { Oc config set tools.exec.mode ask | Out-Null; Write-Warning "Haru PC safety plugin is not active - commands use OpenClaw's own approval. Run the installer again to fix." }
 
+# 3b. How the phone reaches this computer: Haru relay (default) or direct/self-hosted
+#   $env:HARU_PC_CONNECTION = 'relay' | 'direct' to skip the question
+$connection = $env:HARU_PC_CONNECTION
+if (-not $connection) {
+  Say 'How should the Haru app reach this computer?'
+  Write-Host '  1) Haru relay (recommended) - works anywhere, end-to-end encrypted, nothing to set up'
+  Write-Host '  2) Direct only (self-hosted) - no relay; same Wi-Fi, or your own Tailscale away from home'
+  try { $pick = Read-Host 'Choose 1 or 2 [1]' } catch { $pick = '1' }
+  $connection = if ($pick -eq '2') { 'direct' } else { 'relay' }
+}
+$env:HARU_PC_HOME = $HaruHome
+$relayScript = Join-Path $app 'plugin\relay-config.mjs'
+if ($connection -eq 'direct') { & node $relayScript off | Out-Null } else { & node $relayScript on | Out-Null }
+Say ("Connection: " + (& node $relayScript status) + "  - change anytime: haru-pc relay on|off")
+
 # 4. AI model
 $model = (& openclaw --profile $Profile_ config get agents.defaults.model.primary 2>$null) -replace '[\s"{}]', ''
 if (-not $model) { & (Join-Path $BinDir 'haru-pc.ps1') model choose }

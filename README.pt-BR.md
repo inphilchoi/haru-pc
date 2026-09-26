@@ -101,6 +101,8 @@ Prefere ler o script antes? Baixe o [`install.sh`](install.sh) ou o [`install.ps
 
 **Usando fora de casa:** não há nada a configurar. O código de pareamento já inclui o relay criptografado do Haru, então o app alcança o Haru PC de qualquer lugar. O Haru PC nunca abre uma porta para a internet pública. (Se preferir sua própria rede [Tailscale](https://tailscale.com), `haru-pc remote on` continua funcionando.)
 
+**Prefere não usar nosso relay?** Escolha **Conexão direta (auto-hospedada)** na instalação, ou execute `haru-pc relay off`. O celular passa a se conectar direto ao computador na mesma rede Wi-Fi; fora de casa, use seu próprio Tailscale (`haru-pc remote on`) ou seu próprio relay (`haru-pc relay url wss://…`). Veja [docs/self-host-relay.md](docs/self-host-relay.md).
+
 ---
 
 ## Escolher o modelo de IA

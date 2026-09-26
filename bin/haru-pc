@@ -30,7 +30,9 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc allow <folder>       let Haru PC work in another folder
   haru-pc readonly on|off      block every change (recommended with small local models)
   haru-pc skills [enable|disable <name>]
-  haru-pc remote on|off        reach Haru PC away from home through your own Tailscale
+  haru-pc relay [on|off|status] connection: Haru relay (default, works anywhere) or off = direct/self-hosted only
+  haru-pc relay url <wss://…>  use your own relay (deploy relay/ from the repo to your Cloudflare) — `default` to go back
+  haru-pc remote on|off        with the relay off: reach Haru PC away from home through your own Tailscale
   haru-pc update               update to the next tested version
   haru-pc uninstall            stop and remove Haru PC (settings stay in ~/.haru-pc)
 EOF
@@ -112,6 +114,13 @@ case "$cmd" in
       enable|disable) oc config set "skills.entries.${2:?skill name}.enabled" "$([ "$1" = enable ] && echo true || echo false)" --json >/dev/null && say "${2}: ${1}d" ;;
       *) say "Use: haru-pc skills [enable|disable <name>]"; exit 2 ;;
     esac ;;
+  relay)
+    # How the phone reaches this computer: Haru relay (default) or self-hosted/direct.
+    if [ -z "${1:-}" ] || [ "$1" = status ]; then
+      HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" status
+    else
+      HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" "$@" && oc gateway restart >/dev/null 2>&1 || true
+    fi ;;
   remote)
     case "${1:-}" in
       on)  command -v tailscale >/dev/null || { say "Install Tailscale first: https://tailscale.com/download"; exit 1; }

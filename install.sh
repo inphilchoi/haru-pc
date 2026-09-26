@@ -78,6 +78,24 @@ else
   say "Haru PC safety plugin is not active — commands will use OpenClaw's own approval. Run the installer again to fix."
 fi
 
+# ---- 3b. how the phone reaches this computer ---------------------------------------------------
+#   relay  (default) Haru relay — works anywhere, end-to-end encrypted, nothing to set up
+#   direct           self-hosted: no relay; same Wi-Fi directly, away from home via your own Tailscale
+#                    (or your own relay later: haru-pc relay url wss://…)
+CONNECTION="${HARU_PC_CONNECTION:-}"
+if [ -z "$CONNECTION" ] && [ -r /dev/tty ] && { true </dev/tty; } 2>/dev/null; then
+  say "How should the Haru app reach this computer?"
+  echo "  1) Haru relay (recommended) — works anywhere, end-to-end encrypted, nothing to set up"
+  echo "  2) Direct only (self-hosted) — no relay; same Wi-Fi, or your own Tailscale away from home"
+  read -r -p "Choose 1 or 2 [1]: " pick </dev/tty || pick=1
+  case "$pick" in 2) CONNECTION=direct ;; *) CONNECTION=relay ;; esac
+fi
+case "${CONNECTION:-relay}" in
+  direct) HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" off >/dev/null ;;
+  *)      HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" on >/dev/null ;;
+esac
+say "Connection: $(HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" status)  — change anytime: haru-pc relay on|off"
+
 # ---- 4. AI model -----------------------------------------------------------------------------
 if [ -z "$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n')" ]; then
   "$BIN_DIR/haru-pc" model choose </dev/tty || say "You can choose a model later with: haru-pc model"

@@ -71,6 +71,13 @@ switch ($cmd) {
     if ($a1 -in 'enable', 'disable') { Oc config set "skills.entries.$a2.enabled" ($(if ($a1 -eq 'enable') { 'true' } else { 'false' })) --json | Out-Null; Say "${a2}: ${a1}d" }
     else { Oc skills list }
   }
+  'relay' {
+    # How the phone reaches this computer: Haru relay (default) or self-hosted/direct.
+    $env:HARU_PC_HOME = $HaruHome
+    $script = Join-Path $HaruHome 'app\plugin\relay-config.mjs'
+    if (-not $a1 -or $a1 -eq 'status') { & node $script status }
+    else { & node $script @($Args_ | Select-Object -Skip 1); if ($LASTEXITCODE -eq 0) { try { Oc gateway restart | Out-Null } catch {} } }
+  }
   'remote' {
     if ($a1 -eq 'on') {
       if (-not (Get-Command tailscale -ErrorAction SilentlyContinue)) { Say 'Install Tailscale first: https://tailscale.com/download'; exit 1 }
@@ -86,7 +93,7 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc pair | approve | unpair | status | logs
   haru-pc model [choose | login chatgpt|claude|copilot | key <provider> | local]
   haru-pc allow <folder> | readonly on|off | skills [enable|disable <name>]
-  haru-pc remote on|off | update | uninstall
+  haru-pc relay on|off|status|url <wss://…> | remote on|off | update | uninstall
 '@
   }
 }

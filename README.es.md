@@ -101,6 +101,8 @@ El instalador:
 
 **Uso fuera de casa:** no hay nada que configurar. El código de emparejamiento ya incluye el relé cifrado de Haru, así que la app llega a Haru PC desde cualquier lugar. Haru PC nunca abre un puerto hacia internet. (Si prefiere su propia red de [Tailscale](https://tailscale.com), `haru-pc remote on` sigue funcionando.)
 
+**¿Prefiere no usar nuestro relé?** Elija **Conexión directa (autoalojada)** al instalar, o ejecute `haru-pc relay off`. El teléfono se conectará directamente a su computadora en la misma red Wi-Fi; fuera de casa, use su propio Tailscale (`haru-pc remote on`) o su propio relé (`haru-pc relay url wss://…`). Vea [docs/self-host-relay.md](docs/self-host-relay.md).
+
 ---
 
 ## Elegir el modelo de IA
