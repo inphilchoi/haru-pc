@@ -26,7 +26,7 @@ Haru PC funciona sobre [OpenClaw](https://github.com/openclaw/openclaw), el asis
    ◀── "Listo: 12 movidos, 3 duplicados" ────────  envía el resultado
 ```
 
-- **Su teléfono se comunica directamente con su propia computadora** mediante una conexión cifrada. En la misma red Wi-Fi, se encuentran automáticamente. Fuera de casa, puede conectarse a través de su propia red de [Tailscale](https://tailscale.com). Nada pasa por un servidor administrado por nosotros.
+- **Su teléfono se comunica con su propia computadora** mediante una conexión cifrada de extremo a extremo. En la misma red Wi-Fi se conectan directamente; fuera de casa pasan por el relé de Haru, que solo transmite datos cifrados que no puede leer y no guarda nada salvo un hash de su token de conexión. No hace falta configurar el router ni usar VPN.
 - **Nada se ejecuta sin su visto bueno.** Toda acción que modifique archivos, ejecute comandos, envíe mensajes o use el navegador aparece primero como una tarjeta en su teléfono. Solo se ejecuta después de que usted toque **Aprobar**.
 - **Sus datos siguen siendo suyos.** Las conversaciones, la memoria y las credenciales se guardan únicamente en su computadora y en su teléfono.
 
@@ -86,7 +86,7 @@ El instalador:
 4. registra Haru PC para que se inicie en segundo plano (launchd en macOS, una tarea programada en Windows, un servicio `systemd --user` en Linux),
 5. le ayuda a elegir un modelo de IA y, a continuación, muestra un código QR de vinculación.
 
-¿Prefiere leer el script antes? Descargue [`install.sh`](install.sh) o [`install.ps1`](install.ps1), revíselos y luego ejecútelos. También hay paquetes de instalación para cada plataforma en la página de [Releases](https://github.com/inphilchoi/haru-pc/releases).
+¿Prefiere leer el script antes? Descargue [`install.sh`](install.sh) o [`install.ps1`](install.ps1), revíselos y luego ejecútelos. Más información: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
 
@@ -97,9 +97,9 @@ El instalador:
    ```bash
    haru-pc pair
    ```
-3. Su computadora preguntará **"¿Conectar este teléfono?"**. Confirme y compruebe que el código de seguridad coincide en ambas pantallas. Listo.
+3. Cuando la app muestre **"Conectado"**, habrá terminado: en casa o fuera de ella.
 
-**Uso fuera de casa:** instale [Tailscale](https://tailscale.com) en el teléfono y en la computadora, inicie sesión en la misma tailnet y ejecute `haru-pc remote on`. Así, Haru PC solo será accesible dentro de su propia tailnet (Tailscale Serve). Haru PC nunca abre un puerto hacia internet.
+**Uso fuera de casa:** no hay nada que configurar. El código de emparejamiento ya incluye el relé cifrado de Haru, así que la app llega a Haru PC desde cualquier lugar. Haru PC nunca abre un puerto hacia internet. (Si prefiere su propia red de [Tailscale](https://tailscale.com), `haru-pc remote on` sigue funcionando.)
 
 ---
 
@@ -199,7 +199,7 @@ Su configuración se conserva en `~/.haru-pc` hasta que elimine esa carpeta.
 
 | Problema | Qué probar |
 |---|---|
-| El teléfono no encuentra el PC | Compruebe que ambos estén en la misma red Wi-Fi o que los dos hayan iniciado sesión en Tailscale. Después, ejecute `haru-pc status` |
+| El teléfono no encuentra el PC | Compruebe que la computadora esté encendida y conectada a internet y ejecute `haru-pc status`. Si sigue sin funcionar, muestre un código nuevo con `haru-pc pair` y escanéelo de nuevo |
 | El código QR de vinculación caducó | Vuelva a ejecutar `haru-pc pair` |
 | Las tareas van lentas | Un modelo local en un equipo modesto es lento. Inicie sesión con una suscripción mediante `haru-pc model login chatgpt` o `haru-pc model login claude` |
 | Nunca apareció la tarjeta de aprobación | Puede cerrar Haru después de encargar una tarea: Haru PC sigue trabajando hasta 15 minutos y las tarjetas de aprobación pendientes aparecen al volver a abrir Haru. Si una solicitud no se responde en 10 minutos, Haru PC la rechaza y no se ejecuta nada. Abra Haru y vuelva a pedirlo |

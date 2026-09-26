@@ -26,7 +26,7 @@
    ◀── "완료: 12개 이동, 중복 3개" ───────────── 결과를 보내요
 ```
 
-- **휴대폰이 암호화된 연결로 내 컴퓨터와 직접 통신해요.** 같은 Wi-Fi에 있으면 서로 자동으로 찾아요. 집 밖에서는 내 [Tailscale](https://tailscale.com) 네트워크로 연결할 수 있어요. 저희가 운영하는 서버는 전혀 거치지 않아요.
+- **휴대폰이 종단간 암호화된 연결로 내 컴퓨터와 통신해요.** 같은 Wi-Fi에서는 직접 연결하고, 집 밖에서는 하루 중계를 거쳐요. 중계는 읽을 수 없는 암호문만 전달하고, 연결 토큰의 해시 말고는 아무것도 저장하지 않아요. 공유기 설정이나 VPN이 필요 없어요.
 - **내가 허락하지 않으면 아무것도 실행되지 않아요.** 파일을 바꾸거나, 명령을 실행하거나, 메시지를 보내거나, 브라우저를 쓰는 모든 작업은 먼저 휴대폰에 카드로 표시돼요. **승인**을 눌러야만 실행돼요.
 - **내 데이터는 내 것이에요.** 대화, 기억, 자격 증명은 내 컴퓨터와 휴대폰에만 저장돼요.
 
@@ -86,7 +86,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 4. 하루 PC가 백그라운드에서 자동으로 시작되도록 등록해요(macOS는 launchd, Windows는 예약된 작업, Linux는 `systemd --user` 서비스).
 5. AI 모델 선택을 도와준 뒤, 페어링용 QR 코드를 보여 줘요.
 
-스크립트를 먼저 읽어 보고 싶다면 [`install.sh`](install.sh) 또는 [`install.ps1`](install.ps1)을 내려받아 확인한 뒤 실행하세요. 플랫폼별 설치 패키지는 [Releases](https://github.com/inphilchoi/haru-pc/releases) 페이지에서도 받을 수 있어요.
+스크립트를 먼저 읽어 보고 싶다면 [`install.sh`](install.sh) 또는 [`install.ps1`](install.ps1)을 내려받아 확인한 뒤 실행하세요. 더 자세한 안내: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
 
@@ -97,9 +97,9 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
    ```bash
    haru-pc pair
    ```
-3. 컴퓨터에 **"이 휴대폰을 연결할까요?"**라는 확인 창이 떠요. 확인을 누르고, 두 화면의 보안 코드가 같은지 확인하면 끝이에요.
+3. 앱에 **"연결됨"**이 뜨면 끝이에요. 집에서도 밖에서도 쓸 수 있어요.
 
-**집 밖에서 쓰려면:** 휴대폰과 컴퓨터 모두에 [Tailscale](https://tailscale.com)을 설치하고 같은 tailnet에 로그인한 뒤 `haru-pc remote on`을 실행하세요. 그러면 하루 PC에는 내 tailnet 안에서만 접속할 수 있어요(Tailscale Serve). 하루 PC는 공용 인터넷에 포트를 절대 열지 않아요.
+**집 밖에서 쓰려면:** 따로 할 일이 없어요. 연결 코드에 암호화된 하루 중계가 들어 있어서 어디서든 하루 PC에 닿아요. 하루 PC는 공용 인터넷에 포트를 절대 열지 않아요. (내 [Tailscale](https://tailscale.com) 네트워크를 쓰고 싶다면 `haru-pc remote on`도 그대로 쓸 수 있어요.)
 
 ---
 
@@ -199,7 +199,7 @@ haru-pc uninstall    # 백그라운드 서비스를 멈추고 하루 PC 제거
 
 | 문제 | 해결 방법 |
 |---|---|
-| 휴대폰이 PC를 찾지 못해요 | 두 기기가 같은 Wi-Fi에 있는지, 또는 둘 다 Tailscale에 로그인했는지 확인한 뒤 `haru-pc status`를 실행하세요 |
+| 휴대폰이 PC를 찾지 못해요 | 컴퓨터가 켜져 있고 인터넷에 연결돼 있는지 확인한 뒤 `haru-pc status`를 실행하세요. 그래도 안 되면 `haru-pc pair`로 새 코드를 띄워 다시 찍어 주세요 |
 | 페어링 QR 코드가 만료됐어요 | `haru-pc pair`를 다시 실행하세요 |
 | 작업이 느려요 | 사양이 낮은 컴퓨터에서는 로컬 모델이 느려요. `haru-pc model login chatgpt` 또는 `haru-pc model login claude`로 구독에 로그인해 보세요 |
 | 승인 카드가 오지 않아요 | 일을 맡긴 뒤에는 하루 앱을 닫아도 돼요. 하루 PC가 15분까지 일을 이어 가고, 하루를 다시 열면 기다리던 승인 카드가 떠요. 10분 안에 응답하지 않으면 하루 PC가 요청을 거절하고 아무것도 실행하지 않아요. 하루를 열고 다시 부탁해 보세요 |

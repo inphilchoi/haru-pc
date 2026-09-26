@@ -26,7 +26,7 @@ Haru PC 运行在开源个人 AI 助手 [OpenClaw](https://github.com/openclaw/o
    ◀── “完成：移动 12 个，重复 3 个” ────── 发回结果
 ```
 
-- **手机通过加密连接直接与你自己的电脑通信。** 在同一个 Wi-Fi 下，两者会自动发现对方。不在家时，可以通过你自己的 [Tailscale](https://tailscale.com) 网络连接。整个过程不经过我们运营的任何服务器。
+- **手机通过端到端加密连接与你自己的电脑通信。** 在同一个 Wi-Fi 下直接连接，不在家时经由 Haru 中继。中继只转发它无法读取的密文，除了连接令牌的哈希外什么都不保存。无需设置路由器或 VPN。
 - **未经你同意，什么都不会执行。** 凡是修改文件、运行命令、发送消息或使用浏览器的操作，都会先以卡片形式显示在手机上，只有你点了 **批准** 才会执行。
 - **你的数据只属于你。** 对话、记忆和凭据只保存在你的电脑和手机上。
 
@@ -86,7 +86,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 4. 将 Haru PC 注册为后台自启动（macOS 上用 launchd，Windows 上用计划任务，Linux 上用 `systemd --user` 服务）；
 5. 引导你选择 AI 模型，然后显示用于配对的二维码。
 
-想先看看脚本内容？可以下载 [`install.sh`](install.sh) 或 [`install.ps1`](install.ps1)，检查无误后再运行。各平台的安装包也可以在 [Releases](https://github.com/inphilchoi/haru-pc/releases) 页面下载。
+想先看看脚本内容？可以下载 [`install.sh`](install.sh) 或 [`install.ps1`](install.ps1)，检查无误后再运行。更多说明：[inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
 
@@ -97,9 +97,9 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
    ```bash
    haru-pc pair
    ```
-3. 电脑上会弹出 **“要连接这台手机吗？”**。点击确认，并核对两边屏幕上的安全码是否一致，就大功告成了。
+3. 应用显示 **“已连接”** 就完成了，在家在外都能用。
 
-**在外面使用：** 在手机和电脑上都安装 [Tailscale](https://tailscale.com)，登录同一个 tailnet，然后运行 `haru-pc remote on`。这样 Haru PC 就只能在你自己的 tailnet 内访问（Tailscale Serve）。Haru PC 绝不会向公网开放端口。
+**在外面使用：** 无需任何设置。连接码里已经包含加密的 Haru 中继，在哪里都能连到 Haru PC。Haru PC 绝不会向公网开放端口。（如果想用你自己的 [Tailscale](https://tailscale.com) 网络，`haru-pc remote on` 仍然可用。）
 
 ---
 
@@ -199,7 +199,7 @@ haru-pc uninstall    # 停止后台服务并移除 Haru PC
 
 | 问题 | 解决方法 |
 |---|---|
-| 手机找不到电脑 | 确认两者连接的是同一个 Wi-Fi，或都已登录 Tailscale，然后运行 `haru-pc status` |
+| 手机找不到电脑 | 确认电脑已开机并已连接互联网，然后运行 `haru-pc status`。仍不行的话，用 `haru-pc pair` 显示新的连接码再扫一次 |
 | 配对二维码已过期 | 重新运行 `haru-pc pair` |
 | 任务执行很慢 | 在配置较低的电脑上，本地模型会比较慢。可以用 `haru-pc model login chatgpt` 或 `haru-pc model login claude` 登录订阅 |
 | 一直没收到审批卡片 | 交代任务后可以关掉 Haru App：Haru PC 会继续处理最多 15 分钟，重新打开 Haru 时，等待中的审批卡片就会出现。如果请求 10 分钟内没有得到回应，Haru PC 会自动拒绝，不执行任何操作。打开 Haru 再说一次即可 |

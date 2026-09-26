@@ -26,7 +26,7 @@ Haru PC läuft auf [OpenClaw](https://github.com/openclaw/openclaw), dem quellof
    ◀── „Fertig: 12 verschoben, 3 Duplikate“ ──  sendet das Ergebnis
 ```
 
-- **Ihr Smartphone spricht direkt mit Ihrem eigenen Computer**, über eine verschlüsselte Verbindung. Im selben WLAN finden sich die Geräte automatisch. Unterwegs können Sie sich über Ihr eigenes [Tailscale](https://tailscale.com)-Netzwerk verbinden. Nichts läuft über einen Server, den wir betreiben.
+- **Ihr Smartphone spricht mit Ihrem eigenen Computer** über eine Ende-zu-Ende-verschlüsselte Verbindung. Im selben WLAN direkt, unterwegs über das Haru-Relay, das nur verschlüsselte Daten weiterreicht, die es nicht lesen kann, und außer einem Hash Ihres Verbindungstokens nichts speichert. Keine Router-Einstellungen, kein VPN nötig.
 - **Nichts läuft ohne Ihr Okay.** Jede Aktion, die Dateien ändert, Befehle ausführt, Nachrichten sendet oder den Browser verwendet, erscheint zuerst als Karte auf Ihrem Smartphone. Ausgeführt wird sie erst, wenn Sie auf **Freigeben** tippen.
 - **Ihre Daten bleiben Ihre Daten.** Unterhaltungen, Gedächtnis und Zugangsdaten werden ausschließlich auf Ihrem Computer und Ihrem Smartphone gespeichert.
 
@@ -86,7 +86,7 @@ Das Installationsprogramm:
 4. registriert Haru PC für den Start im Hintergrund (launchd unter macOS, eine geplante Aufgabe unter Windows, ein `systemd --user`-Dienst unter Linux),
 5. hilft Ihnen bei der Wahl eines KI-Modells und zeigt anschließend einen QR-Code zum Koppeln an.
 
-Möchten Sie das Skript zuerst lesen? Laden Sie [`install.sh`](install.sh) oder [`install.ps1`](install.ps1) herunter, prüfen Sie die Dateien und führen Sie sie dann aus. Installationspakete für jede Plattform finden Sie außerdem auf der Seite [Releases](https://github.com/inphilchoi/haru-pc/releases).
+Möchten Sie das Skript zuerst lesen? Laden Sie [`install.sh`](install.sh) oder [`install.ps1`](install.ps1) herunter, prüfen Sie die Dateien und führen Sie sie dann aus. Mehr dazu: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
 
@@ -97,9 +97,9 @@ Möchten Sie das Skript zuerst lesen? Laden Sie [`install.sh`](install.sh) oder 
    ```bash
    haru-pc pair
    ```
-3. Ihr Computer fragt **„Dieses Smartphone verbinden?“**. Bestätigen Sie und prüfen Sie, ob der Sicherheitscode auf beiden Bildschirmen übereinstimmt. Fertig.
+3. Sobald die App **„Verbunden“** anzeigt, sind Sie fertig – zu Hause wie unterwegs.
 
-**Nutzung unterwegs:** Installieren Sie [Tailscale](https://tailscale.com) auf dem Smartphone und dem Computer, melden Sie sich bei beiden im selben Tailnet an und führen Sie `haru-pc remote on` aus. Damit ist Haru PC nur innerhalb Ihres eigenen Tailnets erreichbar (Tailscale Serve). Haru PC öffnet niemals einen Port zum öffentlichen Internet.
+**Nutzung unterwegs:** Nichts einzurichten. Der Kopplungscode enthält bereits das verschlüsselte Haru-Relay, sodass die App Haru PC von überall erreicht. Haru PC öffnet niemals einen Port zum öffentlichen Internet. (Wer lieber sein eigenes [Tailscale](https://tailscale.com)-Netzwerk nutzt, kann weiterhin `haru-pc remote on` verwenden.)
 
 ---
 
@@ -199,7 +199,7 @@ Ihre Einstellungen bleiben in `~/.haru-pc`, bis Sie diesen Ordner löschen.
 
 | Problem | Lösungsansatz |
 |---|---|
-| Das Smartphone findet den PC nicht | Prüfen Sie, ob beide Geräte im selben WLAN oder beide bei Tailscale angemeldet sind. Führen Sie dann `haru-pc status` aus |
+| Das Smartphone findet den PC nicht | Prüfen Sie, ob der Computer eingeschaltet und mit dem Internet verbunden ist, und führen Sie dann `haru-pc status` aus. Hilft das nicht, zeigen Sie mit `haru-pc pair` einen neuen Code an und scannen Sie ihn erneut |
 | QR-Code zum Koppeln abgelaufen | Führen Sie `haru-pc pair` erneut aus |
 | Aufgaben dauern lange | Ein lokales Modell auf einem leistungsschwachen Rechner ist langsam. Melden Sie sich mit `haru-pc model login chatgpt` oder `haru-pc model login claude` bei einem Abonnement an |
 | Es ist keine Freigabekarte erschienen | Nachdem Sie eine Aufgabe übergeben haben, können Sie die Haru-App schließen: Haru PC arbeitet bis zu 15 Minuten weiter, und wartende Freigabekarten erscheinen, sobald Sie Haru wieder öffnen. Wird eine Anfrage nicht innerhalb von 10 Minuten beantwortet, lehnt Haru PC sie ab und es wird nichts ausgeführt. Öffnen Sie Haru und stellen Sie die Anfrage erneut |

@@ -26,7 +26,7 @@ Haru PC fonctionne sur [OpenClaw](https://github.com/openclaw/openclaw), l'assis
    ◀── « Terminé : 12 déplacés, 3 doublons » ───  envoie le résultat
 ```
 
-- **Votre téléphone communique directement avec votre ordinateur** via une connexion chiffrée. Sur le même réseau Wi-Fi, ils se trouvent automatiquement. Hors de chez vous, vous pouvez passer par votre propre réseau [Tailscale](https://tailscale.com). Rien ne transite par un serveur que nous exploitons.
+- **Votre téléphone communique avec votre ordinateur** via une connexion chiffrée de bout en bout. Sur le même Wi-Fi, la connexion est directe ; hors de chez vous, elle passe par le relais Haru, qui ne transmet que des données chiffrées qu'il ne peut pas lire et ne conserve qu'une empreinte (hash) de votre jeton de connexion. Aucun réglage de box ni VPN nécessaire.
 - **Rien ne s'exécute sans votre accord.** Toute action qui modifie des fichiers, lance des commandes, envoie des messages ou utilise le navigateur s'affiche d'abord sous forme de carte sur votre téléphone. Elle ne s'exécute qu'après que vous avez touché **Approuver**.
 - **Vos données restent les vôtres.** Les conversations, la mémoire et les identifiants sont stockés uniquement sur votre ordinateur et votre téléphone.
 
@@ -86,7 +86,7 @@ Le programme d'installation :
 4. configure Haru PC pour qu'il démarre en arrière-plan (launchd sous macOS, tâche planifiée sous Windows, service `systemd --user` sous Linux),
 5. vous aide à choisir un modèle d'IA, puis affiche un QR code d'appairage.
 
-Vous préférez lire le script avant de l'exécuter ? Téléchargez [`install.sh`](install.sh) ou [`install.ps1`](install.ps1), vérifiez-les, puis lancez-les. Des paquets d'installation pour chaque plateforme sont également disponibles sur la page [Releases](https://github.com/inphilchoi/haru-pc/releases).
+Vous préférez lire le script avant de l'exécuter ? Téléchargez [`install.sh`](install.sh) ou [`install.ps1`](install.ps1), vérifiez-les, puis lancez-les. En savoir plus : [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
 
@@ -97,9 +97,9 @@ Vous préférez lire le script avant de l'exécuter ? Téléchargez [`install.sh
    ```bash
    haru-pc pair
    ```
-3. Votre ordinateur demande **« Connecter ce téléphone ? »**. Confirmez, puis vérifiez que le code de sécurité est identique sur les deux écrans. C'est terminé.
+3. Quand l'application affiche **« Connecté »**, c'est terminé — chez vous comme à l'extérieur.
 
-**Utilisation hors de chez vous :** installez [Tailscale](https://tailscale.com) sur le téléphone et sur l'ordinateur, connectez-vous au même tailnet, puis exécutez `haru-pc remote on`. Haru PC n'est alors accessible qu'à l'intérieur de votre propre tailnet (Tailscale Serve). Haru PC n'ouvre jamais de port sur l'internet public.
+**Utilisation hors de chez vous :** rien à configurer. Le code d'association contient déjà le relais Haru chiffré : l'application atteint Haru PC où que vous soyez. Haru PC n'ouvre jamais de port sur l'internet public. (Si vous préférez votre propre réseau [Tailscale](https://tailscale.com), `haru-pc remote on` fonctionne toujours.)
 
 ---
 
@@ -199,7 +199,7 @@ Vos réglages restent dans `~/.haru-pc` tant que vous ne supprimez pas ce dossie
 
 | Problème | Solution |
 |---|---|
-| Le téléphone ne trouve pas le PC | Vérifiez que les deux appareils sont sur le même Wi-Fi, ou tous deux connectés à Tailscale. Exécutez ensuite `haru-pc status` |
+| Le téléphone ne trouve pas le PC | Vérifiez que l'ordinateur est allumé et connecté à internet, puis exécutez `haru-pc status`. Si cela ne suffit pas, affichez un nouveau code avec `haru-pc pair` et scannez-le à nouveau |
 | Le QR code d'appairage a expiré | Exécutez de nouveau `haru-pc pair` |
 | Les tâches sont lentes | Un modèle local sur une machine modeste est lent. Connectez-vous à un abonnement avec `haru-pc model login chatgpt` ou `haru-pc model login claude` |
 | Aucune carte d'approbation n'est apparue | Vous pouvez fermer Haru après avoir confié une tâche : Haru PC continue jusqu'à 15 minutes, et les cartes d'approbation en attente s'affichent quand vous rouvrez Haru. Si une demande reste sans réponse pendant 10 minutes, Haru PC la refuse et rien ne s'exécute. Ouvrez Haru et redemandez |

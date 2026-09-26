@@ -26,7 +26,7 @@ Haru PC 在開放原始碼的個人 AI 助理 [OpenClaw](https://github.com/open
    ◀── 「完成：移動 12 個，重複 3 個」 ────── 傳回結果
 ```
 
-- **手機透過加密連線，直接與你自己的電腦溝通。** 在同一個 Wi-Fi 網路下，兩者會自動找到彼此。不在家時，可以透過你自己的 [Tailscale](https://tailscale.com) 網路連線。過程中不會經過任何由我們營運的伺服器。
+- **手機透過端對端加密連線，與你自己的電腦溝通。** 在同一個 Wi-Fi 下直接連線，不在家時經由 Haru 中繼。中繼只轉送它無法讀取的密文，除了連線權杖的雜湊值之外什麼都不儲存。不需要設定路由器或 VPN。
 - **沒有你的同意，什麼都不會執行。** 任何會變更檔案、執行指令、傳送訊息或使用瀏覽器的動作，都會先以卡片形式顯示在手機上，必須等你點選 **核准** 才會執行。
 - **你的資料只屬於你。** 對話、記憶與憑證只會儲存在你的電腦和手機上。
 
@@ -86,7 +86,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 4. 將 Haru PC 註冊為在背景自動啟動（macOS 使用 launchd，Windows 使用排程工作，Linux 使用 `systemd --user` 服務）；
 5. 協助你選擇 AI 模型，然後顯示配對用的 QR 碼。
 
-想先看過指令碼內容？可以下載 [`install.sh`](install.sh) 或 [`install.ps1`](install.ps1)，確認後再執行。各平台的安裝套件也可以在 [Releases](https://github.com/inphilchoi/haru-pc/releases) 頁面下載。
+想先看過指令碼內容？可以下載 [`install.sh`](install.sh) 或 [`install.ps1`](install.ps1)，確認後再執行。更多說明：[inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
 
@@ -97,9 +97,9 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
    ```bash
    haru-pc pair
    ```
-3. 電腦上會詢問 **「要連接這支手機嗎？」**。按下確認，並核對兩邊螢幕上的安全碼是否相同，就完成了。
+3. App 顯示 **「已連線」** 就完成了，在家在外都能使用。
 
-**在外面使用：** 在手機和電腦上都安裝 [Tailscale](https://tailscale.com)，登入同一個 tailnet，然後執行 `haru-pc remote on`。這樣一來，只有在你自己的 tailnet 內才能連到 Haru PC（Tailscale Serve）。Haru PC 絕不會對公開網際網路開放連接埠。
+**在外面使用：** 不需要任何設定。連線碼裡已經包含加密的 Haru 中繼，在哪裡都能連到 Haru PC。Haru PC 絕不會對公開網際網路開放連接埠。（如果想用你自己的 [Tailscale](https://tailscale.com) 網路，`haru-pc remote on` 仍然可以使用。）
 
 ---
 
@@ -199,7 +199,7 @@ haru-pc uninstall    # 停止背景服務並移除 Haru PC
 
 | 問題 | 解決方式 |
 |---|---|
-| 手機找不到電腦 | 確認兩者連上同一個 Wi-Fi，或都已登入 Tailscale，然後執行 `haru-pc status` |
+| 手機找不到電腦 | 確認電腦已開機並連上網際網路，然後執行 `haru-pc status`。還是不行的話，用 `haru-pc pair` 顯示新的連線碼再掃一次 |
 | 配對 QR 碼已過期 | 重新執行 `haru-pc pair` |
 | 工作執行得很慢 | 在效能較低的電腦上，本機模型會比較慢。可以用 `haru-pc model login chatgpt` 或 `haru-pc model login claude` 登入訂閱方案 |
 | 一直沒收到核准卡片 | 交代工作後可以關閉 Haru App：Haru PC 會繼續處理最多 15 分鐘，重新開啟 Haru 時，等待中的核准卡片就會出現。如果請求在 10 分鐘內沒有得到回應，Haru PC 會自動拒絕，不會執行任何動作。請開啟 Haru 再說一次 |
