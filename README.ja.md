@@ -56,7 +56,7 @@ Haru PC は、オープンソースのパーソナル AI アシスタント [Ope
   - `systemd` を使う **Linux**: Ubuntu 22.04 以降、Debian 12 以降、Fedora など。クラウドモデルを使うなら Raspberry Pi 4/5（64 ビット、2 GB 以上）でも動作します
   - **Node.js 24** 以降。入っていなければインストーラーが自動でインストールします
 - ご自身で選ぶ **AI モデル**:
-  - **クラウドモデル**: すでに契約している ChatGPT、Claude、GitHub Copilot のサブスクリプションでサインインするか、API キーを使います（例: Gemini）。最も高品質です。
+  - **クラウドモデル**: 契約中の ChatGPT・Grok のプランや GitHub Copilot でサインインするか、API キー（ChatGPT・Claude・Gemini・Grok・Meta など）を使います。最も高品質です。
   - パソコン上で動く **ローカルモデル**（llama.cpp または [Ollama](https://ollama.com)）。無料で完全にプライベートですが、動作は遅めです。RAM 16 GB なら、実用上はパラメーター数 90 億（9B）程度のモデルが上限です。安全のため、小さなローカルモデルには、設定を変更しない限り読み取り専用のスキルだけが割り当てられます。
   - **無料クラウドモデル**: OpenCode Zen の「Space Bunny」。登録不要で期間限定の無料です。使い方は下の「AI モデルを選ぶ」にあります。
 
@@ -115,7 +115,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 | プロバイダー | 接続方法 |
 |---|---|
 | **ChatGPT**（OpenAI） | `haru-pc model login chatgpt` を実行し、OpenAI のページでサインインします。ご契約中の ChatGPT プランの利用上限が適用されます |
-| **Claude**（Anthropic） | Anthropic 公式の Claude CLI で一度サインインしてから（`claude auth login`）、`haru-pc model login claude` を実行します。ご契約中の Claude プランの利用上限が適用されます。プランをほかのツールで使うことについては、Anthropic の最新の規約をご確認ください |
+| **Claude** (Anthropic) | API キー: `haru-pc model key claude`。Anthropic の規約（2026年2月）では Claude Free/Pro/Max のサインインを他のツールで使えないため、キーをおすすめします |
 | **Grok** (xAI) | `haru-pc model login grok` を実行し、xAI のページでサインイン（SuperGrok または X Premium）。API キーなら `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot` を実行し、GitHub のページに表示されたコードを入力します |
 

@@ -56,7 +56,7 @@ Les compétences peuvent être ajoutées, activées ou désactivées. Voir [Comp
   - **Linux** avec `systemd` : Ubuntu 22.04+, Debian 12+, Fedora et équivalents. Un Raspberry Pi 4/5 (64 bits, 2 Go ou plus) convient aussi, à condition d'utiliser un modèle cloud
   - **Node.js 24** ou version ultérieure. Le programme d'installation l'installe pour vous s'il est absent
 - **Un modèle d'IA**, à votre choix :
-  - **Modèle cloud :** connectez-vous avec un abonnement ChatGPT, Claude ou GitHub Copilot que vous avez déjà, ou utilisez une clé d'API (par exemple Gemini). C'est l'option qui offre la meilleure qualité.
+  - **Modèle cloud :** connectez-vous avec un abonnement ChatGPT ou Grok ou GitHub Copilot existant, ou utilisez une clé API (ChatGPT, Claude, Gemini, Grok, Meta, etc.). C'est la meilleure qualité.
   - **Modèle local** exécuté sur votre ordinateur (llama.cpp ou [Ollama](https://ollama.com)). Il est gratuit et entièrement privé, mais plus lent. Avec 16 Go de RAM, un modèle d'environ 9 milliards de paramètres est la limite en pratique. Par sécurité, les petits modèles locaux n'ont accès qu'à des compétences en lecture seule, sauf si vous modifiez ce réglage.
   - **Modèle cloud gratuit :** « Space Bunny » d'OpenCode Zen, sans inscription, gratuit pour une durée limitée. Mode d'emploi plus bas, dans « Choisir votre modèle d'IA ».
 
@@ -115,7 +115,7 @@ Choisissez-en un lors de l'installation ; vous pourrez en changer à tout moment
 | Fournisseur | Comment se connecter |
 |---|---|
 | **ChatGPT** (OpenAI) | `haru-pc model login chatgpt`, puis connectez-vous sur la page d'OpenAI. Les limites de votre forfait ChatGPT s'appliquent |
-| **Claude** (Anthropic) | Connectez-vous une fois avec la CLI Claude officielle d'Anthropic (`claude auth login`), puis exécutez `haru-pc model login claude`. Les limites de votre forfait Claude s'appliquent. Vérifiez les conditions actuelles d'Anthropic concernant l'utilisation de votre forfait avec d'autres outils |
+| **Claude** (Anthropic) | Clé API : `haru-pc model key claude`. Les conditions d'Anthropic (févr. 2026) n'autorisent pas les connexions Claude Free/Pro/Max dans d'autres outils, Haru PC recommande donc une clé |
 | **Grok** (xAI) | `haru-pc model login grok`, puis connectez-vous sur la page de xAI (SuperGrok ou X Premium). Ou avec une clé API : `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot`, puis saisissez le code affiché sur la page de GitHub |
 

@@ -56,7 +56,7 @@ Las habilidades se pueden añadir, activar y desactivar. Consulte [Habilidades](
   - **Linux** con `systemd`: Ubuntu 22.04+, Debian 12+, Fedora y similares. También funciona en una Raspberry Pi 4/5 (64 bits, 2 GB o más) si usa un modelo en la nube
   - **Node.js 24** o posterior. Si no está instalado, el instalador se encarga de ello
 - **Un modelo de IA**, a su elección:
-  - **Modelo en la nube:** inicie sesión con una suscripción a ChatGPT, Claude o GitHub Copilot que ya tenga, o use una clave de API (por ejemplo, de Gemini). Ofrece la mejor calidad.
+  - **Modelo en la nube:** inicie sesión con un plan de ChatGPT o Grok o con GitHub Copilot que ya tenga, o use una clave de API (ChatGPT, Claude, Gemini, Grok, Meta y otros). Ofrece la mejor calidad.
   - **Modelo local** que se ejecuta en su computadora (llama.cpp u [Ollama](https://ollama.com)). Es gratuito y totalmente privado, pero más lento. Con 16 GB de RAM, el límite práctico es un modelo de unos 9B de parámetros. Por seguridad, los modelos locales pequeños solo tienen habilidades de solo lectura, salvo que usted cambie esta opción.
   - **Modelo en la nube gratuito:** «Space Bunny» de OpenCode Zen, sin registro, gratis por tiempo limitado. Instrucciones abajo, en «Elegir el modelo de IA».
 
@@ -115,7 +115,7 @@ Elija uno durante la instalación; puede cambiarlo cuando quiera.
 | Proveedor | Cómo conectarse |
 |---|---|
 | **ChatGPT** (OpenAI) | `haru-pc model login chatgpt` y, después, inicie sesión en la página de OpenAI. Se aplican los límites de su plan de ChatGPT |
-| **Claude** (Anthropic) | Inicie sesión una vez con la CLI oficial de Claude de Anthropic (`claude auth login`) y luego ejecute `haru-pc model login claude`. Se aplican los límites de su plan de Claude. Consulte las condiciones vigentes de Anthropic sobre el uso de su plan con otras herramientas |
+| **Claude** (Anthropic) | Clave de API: `haru-pc model key claude`. Los términos de Anthropic (feb. 2026) no permiten usar inicios de sesión de Claude Free/Pro/Max en otras herramientas, así que Haru PC recomienda una clave |
 | **Grok** (xAI) | `haru-pc model login grok` e inicie sesión en la página de xAI (SuperGrok o X Premium). O con clave de API: `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot` y, después, introduzca el código que aparece en la página de GitHub |
 

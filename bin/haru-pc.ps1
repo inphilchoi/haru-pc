@@ -26,7 +26,7 @@ switch ($cmd) {
         Write-Host @'
 Which AI should Haru PC use?
   1) ChatGPT (OpenAI)      - sign in with your plan, or an API key
-  2) Claude (Anthropic)    - sign in with your plan, or an API key
+  2) Claude (Anthropic)    - API key (plan sign-in isn't allowed by Anthropic's terms)
   3) Gemini (Google)       - API key (free key at aistudio.google.com/apikey)
   4) Grok (xAI)            - sign in with SuperGrok / X Premium, or an API key
   5) Meta (Llama / Muse)   - API key
@@ -44,7 +44,11 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
         }
         switch ($n) {
           '1' { How 'chatgpt' }
-          '2' { How 'claude' }
+          '2' {
+            Say "Note: Anthropic's terms (Feb 2026) don't allow Claude Free/Pro/Max sign-ins in other tools - an API key is the safe way."
+            $h = ''; try { $h = Read-Host '  1) API key (recommended)   2) Sign in with your Claude plan anyway   [1]' } catch {}
+            if ($h -eq '2') { & $PSCommandPath model login claude } else { & $PSCommandPath model key claude }
+          }
           '3' { & $PSCommandPath model key gemini }
           '4' { How 'grok' }
           '5' { & $PSCommandPath model key meta }
@@ -68,6 +72,9 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
         switch ($a2) {
           { $_ -in 'chatgpt','openai' } { Say "OpenAI's sign-in page will open. Enter your ID and password there, not here."; Clear-Main; try { Oc models auth login --provider openai } catch {}; Check-Main }
           { $_ -in 'claude','anthropic' } {
+            Say "Anthropic's terms (Feb 2026) don't allow Claude Free/Pro/Max sign-ins in other tools, and accounts can be limited. The safe way is an API key: haru-pc model key claude"
+            $yn = ''; try { $yn = Read-Host 'Use your Claude plan anyway? [y/N]' } catch {}
+            if ($yn -notmatch '^[Yy]') { Say 'OK - run: haru-pc model key claude'; exit 1 }
             if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { Say "First sign in to Claude's official app: claude auth login"; exit 1 }
             & claude auth status | Out-Null; if ($LASTEXITCODE -ne 0) { Say "First sign in to Claude's official app: claude auth login"; exit 1 }
             Oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice anthropic-cli --workspace $Ws

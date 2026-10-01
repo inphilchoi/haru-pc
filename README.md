@@ -56,7 +56,7 @@ Skills can be added and switched on or off. See [Skills](#skills).
   - **Linux** with `systemd`: Ubuntu 22.04+, Debian 12+, Fedora, and similar. A Raspberry Pi 4/5 (64-bit, 2 GB+) works too, if you use a cloud model
   - **Node.js 24** or later. The installer installs it for you if it's missing
 - **An AI model**, which you choose:
-  - **Cloud model:** sign in with a ChatGPT, Claude, or GitHub Copilot subscription you already have, or use an API key (for example Gemini). This gives the best quality.
+  - **Cloud model:** sign in with a ChatGPT or Grok plan or GitHub Copilot you already have, or use an API key (ChatGPT, Claude, Gemini, Grok, Meta and others). This gives the best quality.
   - **Local model** that runs on your computer (llama.cpp or [Ollama](https://ollama.com)). It's free and fully private but slower. With 16 GB of RAM, a model of about 9B parameters is the practical limit. For safety, small local models get read-only skills unless you change it.
   - **Free cloud model:** OpenCode Zen's "Space Bunny", with no sign-up, free for a limited time. See [Start with the free model](#choose-your-ai-model).
 
@@ -115,7 +115,7 @@ Pick one when you install, and change it any time.
 | Provider | How to connect |
 |---|---|
 | **ChatGPT** (OpenAI) | `haru-pc model login chatgpt`, then sign in on OpenAI's page. Your ChatGPT plan's limits apply |
-| **Claude** (Anthropic) | Sign in once with Anthropic's official Claude CLI (`claude auth login`), then run `haru-pc model login claude`. Your Claude plan's limits apply. Please check Anthropic's current terms for using your plan with other tools |
+| **Claude** (Anthropic) | API key: `haru-pc model key claude`. Anthropic's terms (Feb 2026) don't allow Claude Free/Pro/Max sign-ins in other tools, so Haru PC recommends a key |
 | **Grok** (xAI) | `haru-pc model login grok`, then sign in on xAI's page (SuperGrok or X Premium). Or an API key: `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot`, then enter the code shown on GitHub's page |
 

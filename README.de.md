@@ -56,7 +56,7 @@ Skills lassen sich hinzufügen sowie ein- und ausschalten. Siehe [Skills](#skill
   - **Linux** mit `systemd`: Ubuntu 22.04+, Debian 12+, Fedora und vergleichbare Distributionen. Auch ein Raspberry Pi 4/5 (64 Bit, ab 2 GB) funktioniert, sofern Sie ein Cloud-Modell verwenden
   - **Node.js 24** oder neuer. Falls es fehlt, installiert das Installationsprogramm es für Sie
 - **Ein KI-Modell** Ihrer Wahl:
-  - **Cloud-Modell:** Melden Sie sich mit einem bereits vorhandenen ChatGPT-, Claude- oder GitHub-Copilot-Abonnement an, oder verwenden Sie einen API-Schlüssel (zum Beispiel für Gemini). Das liefert die beste Qualität.
+  - **Cloud-Modell:** Melden Sie sich mit einem vorhandenen ChatGPT- oder Grok-Abo bzw. GitHub Copilot an, oder nutzen Sie einen API-Schlüssel (ChatGPT, Claude, Gemini, Grok, Meta u. a.). Das bietet die beste Qualität.
   - **Lokales Modell**, das auf Ihrem Computer läuft (llama.cpp oder [Ollama](https://ollama.com)). Es ist kostenlos und vollständig privat, aber langsamer. Mit 16 GB RAM liegt die praktische Grenze bei einem Modell mit etwa 9 Mrd. Parametern. Aus Sicherheitsgründen erhalten kleine lokale Modelle nur Skills mit Lesezugriff, sofern Sie das nicht ändern.
   - **Kostenloses Cloud-Modell:** „Space Bunny“ von OpenCode Zen, ohne Anmeldung, für begrenzte Zeit kostenlos. Anleitung unten unter „KI-Modell wählen“.
 
@@ -115,7 +115,7 @@ Sie wählen ein Modell bei der Installation und können es jederzeit wechseln.
 | Anbieter | So verbinden Sie sich |
 |---|---|
 | **ChatGPT** (OpenAI) | `haru-pc model login chatgpt` ausführen und sich dann auf der Seite von OpenAI anmelden. Es gelten die Limits Ihres ChatGPT-Tarifs |
-| **Claude** (Anthropic) | Einmal mit der offiziellen Claude CLI von Anthropic anmelden (`claude auth login`) und dann `haru-pc model login claude` ausführen. Es gelten die Limits Ihres Claude-Tarifs. Bitte prüfen Sie die aktuellen Bedingungen von Anthropic zur Nutzung Ihres Tarifs mit anderen Tools |
+| **Claude** (Anthropic) | API-Schlüssel: `haru-pc model key claude`. Laut den Bedingungen von Anthropic (Feb. 2026) dürfen Claude-Free/Pro/Max-Anmeldungen nicht in anderen Tools genutzt werden, daher empfiehlt Haru PC einen Schlüssel |
 | **Grok** (xAI) | `haru-pc model login grok`, dann auf der Seite von xAI anmelden (SuperGrok oder X Premium). Oder per API-Schlüssel: `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot` ausführen und dann den angezeigten Code auf der Seite von GitHub eingeben |
 

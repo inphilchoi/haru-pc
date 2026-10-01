@@ -56,7 +56,7 @@
   - `systemd`를 쓰는 **Linux**: Ubuntu 22.04 이상, Debian 12 이상, Fedora 등. 클라우드 모델을 쓴다면 Raspberry Pi 4/5(64비트, 2GB 이상)에서도 돌아가요
   - **Node.js 24** 이상. 없으면 설치 프로그램이 알아서 설치해요
 - 직접 고르는 **AI 모델**:
-  - **클라우드 모델**: 이미 쓰고 있는 ChatGPT, Claude, GitHub Copilot 구독으로 로그인하거나, API 키를 사용해요(예: Gemini). 품질이 가장 좋아요.
+  - **클라우드 모델**: 이미 쓰는 ChatGPT·Grok 요금제나 GitHub Copilot으로 로그인하거나, API 키(ChatGPT·Claude·Gemini·Grok·Meta 등)를 써요. 품질이 가장 좋아요.
   - 내 컴퓨터에서 돌아가는 **로컬 모델**(llama.cpp 또는 [Ollama](https://ollama.com)). 무료이고 완전히 비공개지만 느려요. RAM 16GB라면 파라미터 약 9B 모델이 현실적인 한계예요. 안전을 위해, 작은 로컬 모델에는 설정을 바꾸지 않는 한 읽기 전용 스킬만 주어져요.
   - **무료 클라우드 모델**: OpenCode Zen의 "Space Bunny". 가입 없이 기간 한정 무료예요. 사용법은 아래 'AI 모델 고르기'에 있어요.
 
@@ -115,7 +115,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 | 제공업체 | 연결 방법 |
 |---|---|
 | **ChatGPT**(OpenAI) | `haru-pc model login chatgpt`를 실행한 뒤 OpenAI 페이지에서 로그인하세요. 내 ChatGPT 요금제의 사용 한도가 적용돼요 |
-| **Claude**(Anthropic) | Anthropic의 공식 Claude CLI로 한 번 로그인한 뒤(`claude auth login`) `haru-pc model login claude`를 실행하세요. 내 Claude 요금제의 사용 한도가 적용돼요. 요금제를 다른 도구에서 쓰는 것에 관한 Anthropic의 최신 약관을 꼭 확인해 주세요 |
+| **Claude** (Anthropic) | API 키: `haru-pc model key claude`. Anthropic 약관(2026년 2월)상 Claude 무료·Pro·Max 로그인을 다른 도구에서 쓸 수 없어서 키를 권장해요 |
 | **Grok** (xAI) | `haru-pc model login grok` 후 xAI 페이지에서 로그인 (SuperGrok 또는 X Premium). 또는 API 키: `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot`을 실행한 뒤 GitHub 페이지에 표시된 코드를 입력하세요 |
 

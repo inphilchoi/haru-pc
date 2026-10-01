@@ -22,7 +22,7 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc model                show the current AI model
   haru-pc model choose         choose a model (menu)
   haru-pc model login chatgpt  sign in with your ChatGPT plan (OpenAI's own page)
-  haru-pc model login claude   use your Claude plan (after `claude auth login`)
+  haru-pc model login claude   use your Claude plan (after `claude auth login`) — Anthropic's terms don't allow this; prefer a key
   haru-pc model login grok     sign in with SuperGrok / X Premium (xAI's own page)
   haru-pc model login copilot  sign in with GitHub Copilot
   haru-pc model key <provider> use an API key: chatgpt, claude, gemini, grok, meta, mistral, deepseek…
@@ -63,7 +63,7 @@ model_choose() {
   cat <<'EOF'
 Which AI should Haru PC use?
   1) ChatGPT (OpenAI)      — sign in with your plan, or an API key
-  2) Claude (Anthropic)    — sign in with your plan, or an API key
+  2) Claude (Anthropic)    — API key (plan sign-in isn't allowed by Anthropic's terms)
   3) Gemini (Google)       — API key (free key at aistudio.google.com/apikey)
   4) Grok (xAI)            — sign in with SuperGrok / X Premium, or an API key
   5) Meta (Llama / Muse)   — API key
@@ -81,7 +81,9 @@ EOF
   }
   case "$n" in
     1) how chatgpt ;;
-    2) how claude ;;
+    2) say "Note: Anthropic's terms (Feb 2026) don't allow Claude Free/Pro/Max sign-ins in other tools — an API key is the safe way."
+       local h; read -r -p "  1) API key (recommended)   2) Sign in with your Claude plan anyway   [1]: " h || h=1
+       if [ "${h:-1}" = 2 ]; then "$0" model login claude; else "$0" model key claude; fi ;;
     3) "$0" model key gemini ;;
     4) how grok ;;
     5) "$0" model key meta ;;
@@ -123,6 +125,10 @@ case "$cmd" in
                    say "OpenAI's sign-in page will open. Enter your ID and password there, not here."
                    switch_to; oc models auth login --provider openai || true; signed_in ;;
           claude|anthropic)
+                   say "Anthropic's terms (Feb 2026) don't allow Claude Free/Pro/Max sign-ins in other tools, and accounts can be limited."
+                   say "The safe way is an API key: haru-pc model key claude"
+                   read -r -p "Use your Claude plan anyway? [y/N] " yn || yn=n
+                   case "$yn" in [Yy]*) ;; *) say "OK — run: haru-pc model key claude"; exit 1 ;; esac
                    if ! command -v claude >/dev/null || ! claude auth status >/dev/null 2>&1; then
                      say "First sign in to Claude's official app: run  claude auth login  (you enter your details on Anthropic's page)."
                      exit 1

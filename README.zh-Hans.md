@@ -56,7 +56,7 @@ Haru PC 运行在开源个人 AI 助手 [OpenClaw](https://github.com/openclaw/o
   - 使用 `systemd` 的 **Linux**：Ubuntu 22.04+、Debian 12+、Fedora 等类似发行版。如果使用云端模型，树莓派 4/5（64 位，2 GB 及以上内存）也能运行
   - **Node.js 24** 或更高版本。如果没有，安装程序会自动帮你安装
 - 由你自己选择的 **AI 模型**：
-  - **云端模型**：用你已有的 ChatGPT、Claude 或 GitHub Copilot 订阅登录，或者使用 API 密钥（例如 Gemini）。效果最好。
+  - **云端模型**：用已有的 ChatGPT、Grok 订阅或 GitHub Copilot 登录，或使用 API 密钥（ChatGPT、Claude、Gemini、Grok、Meta 等）。质量最好。
   - 在你电脑上运行的**本地模型**（llama.cpp 或 [Ollama](https://ollama.com)）。免费且完全私密，但速度较慢。16 GB 内存的电脑，实际能跑的上限大约是 9B 参数的模型。出于安全考虑，除非你手动修改，小型本地模型只能使用只读技能。
   - **免费云端模型**：OpenCode Zen 的“Space Bunny”，无需注册，限时免费。用法见下方的“选择 AI 模型”。
 
@@ -115,7 +115,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 | 服务商 | 连接方式 |
 |---|---|
 | **ChatGPT**（OpenAI） | 运行 `haru-pc model login chatgpt`，然后在 OpenAI 的页面上登录。使用额度以你的 ChatGPT 套餐为准 |
-| **Claude**（Anthropic） | 先用 Anthropic 官方的 Claude CLI 登录一次（`claude auth login`），再运行 `haru-pc model login claude`。使用额度以你的 Claude 套餐为准。关于在其他工具中使用你的套餐，请查阅 Anthropic 的最新条款 |
+| **Claude**（Anthropic） | API 密钥：`haru-pc model key claude`。根据 Anthropic 条款（2026 年 2 月），Claude Free/Pro/Max 登录不能用于其他工具，因此建议使用密钥 |
 | **Grok**（xAI） | 运行 `haru-pc model login grok`，在 xAI 页面登录（SuperGrok 或 X Premium）。也可用 API 密钥：`haru-pc model key grok` |
 | **GitHub Copilot** | 运行 `haru-pc model login copilot`，然后在 GitHub 页面上输入显示的验证码 |
 
