@@ -58,6 +58,7 @@ Haru PC 在開放原始碼的個人 AI 助理 [OpenClaw](https://github.com/open
 - 由你自行選擇的 **AI 模型**：
   - **雲端模型**：使用你已訂閱的 ChatGPT、Claude 或 GitHub Copilot 登入，或使用 API 金鑰（例如 Gemini）。品質最好。
   - 在你電腦上執行的**本機模型**（llama.cpp 或 [Ollama](https://ollama.com)）。免費且完全私密，但速度較慢。以 16 GB 記憶體來說，約 9B 參數的模型就是實際可用的上限。基於安全考量，除非你自行變更，小型本機模型只能使用唯讀技能。
+  - **免費雲端模型**：OpenCode Zen 的「Space Bunny」，不必註冊，限時免費。用法見下方的「選擇 AI 模型」。
 
 ### 建議配置
 
@@ -137,6 +138,13 @@ haru-pc model local           # 推薦適合你電腦的模型
 ```bash
 haru-pc model free
 ```
+
+**用免費模型開始**
+
+1. **開啟** — 安裝時選擇 AI 的步驟中選 **6) 免費雲端模型**；如果已經裝好，執行 `haru-pc model free`。不必註冊、金鑰或付款。
+2. **確認** — `haru-pc model` — 看到 `opencode/space-bunny-free` 就完成了。像平常一樣在手機上交代就好。
+3. **免費期結束後** — 如果之前用過其他模型，會自動切回那個模型；如果沒有，用 `haru-pc model choose` 選擇其他 AI。
+4. **須知** — 訊息會經過 OpenCode 的伺服器（OpenCode 表示不會保存，也不會用於訓練）。限時免費，尚未公布結束日期。
 
 ```bash
 haru-pc model                 # 顯示目前的模型

@@ -58,6 +58,7 @@ Las habilidades se pueden añadir, activar y desactivar. Consulte [Habilidades](
 - **Un modelo de IA**, a su elección:
   - **Modelo en la nube:** inicie sesión con una suscripción a ChatGPT, Claude o GitHub Copilot que ya tenga, o use una clave de API (por ejemplo, de Gemini). Ofrece la mejor calidad.
   - **Modelo local** que se ejecuta en su computadora (llama.cpp u [Ollama](https://ollama.com)). Es gratuito y totalmente privado, pero más lento. Con 16 GB de RAM, el límite práctico es un modelo de unos 9B de parámetros. Por seguridad, los modelos locales pequeños solo tienen habilidades de solo lectura, salvo que usted cambie esta opción.
+  - **Modelo en la nube gratuito:** «Space Bunny» de OpenCode Zen, sin registro, gratis por tiempo limitado. Instrucciones abajo, en «Elegir el modelo de IA».
 
 ### Configuración recomendada
 
@@ -137,6 +138,13 @@ haru-pc model local           # recomienda un modelo adecuado para su computador
 ```bash
 haru-pc model free
 ```
+
+**Empezar con el modelo gratuito**
+
+1. **Actívelo** — Elija **6) Modelo en la nube gratuito** cuando el instalador le pida una IA, o ejecute `haru-pc model free` si Haru PC ya está instalado. Sin registro, clave ni pago.
+2. **Compruébelo** — `haru-pc model`: si ve `opencode/space-bunny-free`, ya está. Encargue tareas desde el teléfono como siempre.
+3. **Cuando termine el periodo gratuito** — Si antes usaba otro modelo, Haru PC vuelve a él automáticamente. Si no, elija otra IA con `haru-pc model choose`.
+4. **Conviene saber** — Sus mensajes pasan por los servidores de OpenCode (OpenCode afirma no guardarlos ni usarlos para entrenar). Es gratis por tiempo limitado y no se ha anunciado la fecha de fin.
 
 ```bash
 haru-pc model                 # muestra el modelo actual

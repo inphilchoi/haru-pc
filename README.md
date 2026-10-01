@@ -58,6 +58,7 @@ Skills can be added and switched on or off. See [Skills](#skills).
 - **An AI model**, which you choose:
   - **Cloud model:** sign in with a ChatGPT, Claude, or GitHub Copilot subscription you already have, or use an API key (for example Gemini). This gives the best quality.
   - **Local model** that runs on your computer (llama.cpp or [Ollama](https://ollama.com)). It's free and fully private but slower. With 16 GB of RAM, a model of about 9B parameters is the practical limit. For safety, small local models get read-only skills unless you change it.
+  - **Free cloud model:** OpenCode Zen's "Space Bunny", with no sign-up, free for a limited time. See [Start with the free model](#choose-your-ai-model).
 
 ### Recommended setup
 
@@ -137,6 +138,13 @@ haru-pc model local           # recommends a model that fits your computer
 ```bash
 haru-pc model free
 ```
+
+**Start with the free model**
+
+1. **Turn it on** — Pick **6) Free cloud model** when the installer asks for an AI, or run `haru-pc model free` if Haru PC is already installed. No sign-up, key or payment.
+2. **Check it** — `haru-pc model` — when you see `opencode/space-bunny-free`, you're done. Ask from your phone as usual.
+3. **When the free period ends** — If you used another model before, Haru PC switches back to it on its own. If not, choose another AI with `haru-pc model choose`.
+4. **Good to know** — Your messages go through OpenCode's servers (OpenCode says it doesn't store them or use them for training). It's free for a limited time, with no end date announced.
 
 ```bash
 haru-pc model                 # show the current model

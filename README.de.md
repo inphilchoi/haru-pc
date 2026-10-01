@@ -58,6 +58,7 @@ Skills lassen sich hinzufügen sowie ein- und ausschalten. Siehe [Skills](#skill
 - **Ein KI-Modell** Ihrer Wahl:
   - **Cloud-Modell:** Melden Sie sich mit einem bereits vorhandenen ChatGPT-, Claude- oder GitHub-Copilot-Abonnement an, oder verwenden Sie einen API-Schlüssel (zum Beispiel für Gemini). Das liefert die beste Qualität.
   - **Lokales Modell**, das auf Ihrem Computer läuft (llama.cpp oder [Ollama](https://ollama.com)). Es ist kostenlos und vollständig privat, aber langsamer. Mit 16 GB RAM liegt die praktische Grenze bei einem Modell mit etwa 9 Mrd. Parametern. Aus Sicherheitsgründen erhalten kleine lokale Modelle nur Skills mit Lesezugriff, sofern Sie das nicht ändern.
+  - **Kostenloses Cloud-Modell:** „Space Bunny“ von OpenCode Zen, ohne Anmeldung, für begrenzte Zeit kostenlos. Anleitung unten unter „KI-Modell wählen“.
 
 ### Empfohlene Einrichtung
 
@@ -137,6 +138,13 @@ haru-pc model local           # empfiehlt ein Modell, das zu Ihrem Computer pass
 ```bash
 haru-pc model free
 ```
+
+**Mit dem kostenlosen Modell starten**
+
+1. **Einschalten** — Wählen Sie bei der Installation unter „KI wählen“ **6) Kostenloses Cloud-Modell**, oder führen Sie `haru-pc model free` aus, wenn Haru PC schon installiert ist. Keine Anmeldung, kein Schlüssel, keine Zahlung.
+2. **Prüfen** — `haru-pc model` — sehen Sie `opencode/space-bunny-free`, ist alles bereit. Geben Sie Aufgaben wie gewohnt per Smartphone.
+3. **Wenn die kostenlose Zeit endet** — Haben Sie vorher ein anderes Modell genutzt, wechselt Haru PC automatisch dorthin zurück. Sonst wählen Sie mit `haru-pc model choose` eine andere KI.
+4. **Gut zu wissen** — Ihre Nachrichten laufen über die Server von OpenCode (OpenCode gibt an, nichts zu speichern und nichts zum Training zu verwenden). Das Angebot ist zeitlich begrenzt; ein Enddatum ist nicht bekannt.
 
 ```bash
 haru-pc model                 # aktuelles Modell anzeigen
