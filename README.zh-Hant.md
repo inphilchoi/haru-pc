@@ -132,6 +132,12 @@ Google Gemini 只能透過 API 金鑰連線，可以在 Google AI Studio 免費�
 haru-pc model local           # 推薦適合你電腦的模型
 ```
 
+**或者使用免費的雲端模型**，不必註冊。OpenCode Zen 的「Space Bunny」限時免費（尚未公布結束日期）。訊息會經過 OpenCode 的伺服器，OpenCode 表示不會保存，也不會用於訓練。你目前的模型會保留為備援，免費期結束後由它接手。
+
+```bash
+haru-pc model free
+```
+
 ```bash
 haru-pc model                 # 顯示目前的模型
 ```
@@ -163,6 +169,8 @@ haru-pc skills disable browser
 | `office` | 建立與讀取 Word、Excel、PowerPoint 和 PDF 文件 |
 | `browser` | 查詢資料、比較網頁。**預設為關閉。** 絕不付款，未經詢問也絕不登入 |
 | `routines` | 依排程執行工作（「每週一早上 9 點」） |
+
+**交給它寫程式：** 如果電腦上裝有 [opencode](https://opencode.ai)（開源程式設計 AI），Haru PC 可以把某個已允許資料夾裡的程式工作交給它，例如「修正 ~/Documents/my-app 的登入錯誤」。每項工作都要在手機上核准；opencode 只能讀取和修改該資料夾內的檔案（不能執行指令、不能上網、不能改 `.git` 和 `.env` 檔案），完成後 Haru PC 會告訴你改了哪些檔案。請在電腦上用 `curl -fsSL https://opencode.ai/install | bash` 安裝 opencode。
 
 Haru PC 內建經過我們自行審查的技能，絕不會自行安裝來自公開市集的技能。要安裝任何新東西，都需要你在手機上核准。
 

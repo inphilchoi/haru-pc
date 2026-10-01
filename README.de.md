@@ -132,6 +132,12 @@ Google Gemini lässt sich nur mit einem API-Schlüssel verbinden. Einen kostenlo
 haru-pc model local           # empfiehlt ein Modell, das zu Ihrem Computer passt
 ```
 
+**Oder ein kostenloses Cloud-Modell**, ohne Anmeldung: „Space Bunny“ von OpenCode Zen ist für begrenzte Zeit kostenlos (ein Enddatum ist nicht bekannt). Ihre Nachrichten laufen über die Server von OpenCode, das nach eigenen Angaben nichts speichert und nichts zum Training verwendet. Ihr bisheriges Modell bleibt als Reserve und übernimmt, wenn die kostenlose Zeit endet.
+
+```bash
+haru-pc model free
+```
+
 ```bash
 haru-pc model                 # aktuelles Modell anzeigen
 ```
@@ -163,6 +169,8 @@ Standard-Skills:
 | `office` | Word-, Excel-, PowerPoint- und PDF-Dokumente erstellen und lesen |
 | `browser` | Informationen nachschlagen und Seiten vergleichen. **Standardmäßig aus.** Bezahlt nie und meldet sich nie ohne Rückfrage an |
 | `routines` | Eine Aufgabe nach Zeitplan ausführen („jeden Montag um 9 Uhr“) |
+
+**Programmieraufgaben:** Ist [opencode](https://opencode.ai) (ein Open-Source-Coding-Agent) auf dem Computer installiert, kann Haru PC ihm eine Programmieraufgabe in einem freigegebenen Ordner übergeben – etwa „behebe den Login-Fehler in ~/Documents/my-app“. Sie bestätigen jede Aufgabe auf dem Smartphone; opencode darf nur Dateien in diesem Ordner lesen und bearbeiten (keine Befehle, kein Internet, keine `.git`- oder `.env`-Dateien), und Haru PC meldet Ihnen die geänderten Dateien. opencode installieren Sie auf dem Computer mit `curl -fsSL https://opencode.ai/install | bash`.
 
 Haru PC bringt eigene, geprüfte Skills mit und installiert niemals von sich aus Skills aus öffentlichen Marktplätzen. Jede neue Installation müssen Sie auf dem Smartphone freigeben.
 

@@ -1,23 +1,40 @@
 {
   "id": "haru-pc",
   "name": "Haru PC",
-  "description": "Asks your phone before Haru PC changes anything, keeps work inside allowed folders, and adds Haru's default skills.",
-  "categories": ["other"],
-  "activation": { "onStartup": true },
-  "skills": ["./skills"],
+  "description": "Asks your phone before Haru PC changes anything, keeps work inside allowed folders, adds Haru's default skills, and can hand coding jobs to opencode.",
+  "categories": [
+    "other"
+  ],
+  "activation": {
+    "onStartup": true
+  },
+  "skills": [
+    "./skills"
+  ],
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {
       "allowedFolders": {
         "type": "array",
-        "items": { "type": "string" },
+        "items": {
+          "type": "string"
+        },
         "description": "Folders Haru PC may change. Defaults to Documents, Downloads, Desktop and the Haru PC workspace."
       },
       "readOnly": {
         "type": "boolean",
         "description": "Block every change (used with small local models)."
+      },
+      "opencodeModel": {
+        "type": "string",
+        "description": "Model for coding jobs handed to opencode (provider/model). Defaults to opencode's own choice."
       }
     }
+  },
+  "contracts": {
+    "tools": [
+      "code_with_opencode"
+    ]
   }
 }

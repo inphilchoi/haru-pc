@@ -11,11 +11,13 @@
 // never shown on the phone and every command failed. The installer therefore sets
 // tools.exec.mode = full and leaves the asking to this plugin.
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { startRelayBridge } from "./relay-bridge.js";
 import { CHAIN_BLOCK_REASON, SETTINGS_BLOCK_REASON, isChainedCommand, touchesSafetySettings } from "./safety.js";
 import { TITLE_MAX, clip, describe, describeCommand } from "./cards.js";
+import { INSTALL_HINT, TOOL_NAME as OPENCODE_TOOL, findOpencode, runOpencode } from "./opencode.js";
 
 // Tools that only look at things. Everything else needs a phone approval.
 const READ_ONLY_TOOLS = new Set([
@@ -24,7 +26,7 @@ const READ_ONLY_TOOLS = new Set([
   "docs_search", "memory_search", "active_memory_search",
   "agents_list", "conversations_list", "get_goal", "ask_user",
   // OpenClaw's own bookkeeping (finding tools, yielding a turn) — changes nothing on the computer
-  "tool_search", "sessions_yield", "sessions_list", "sessions_history",
+  "tool_search", "tool_describe", "sessions_yield", "sessions_list", "sessions_history",
   // Claude/Codex runtime's own planning list — stays inside the AI
   "todo_write",
 ]);
@@ -49,7 +51,7 @@ function expandHome(p) {
 function targetPaths(event, base) {
   const out = new Set(event.derivedPaths ?? []);
   const p = event.params ?? {};
-  for (const key of ["path", "file_path", "filePath", "target", "destination", "dest", "to", "from", "source", "cwd", "workdir", "directory", "dir"]) {
+  for (const key of ["path", "file_path", "filePath", "target", "destination", "dest", "to", "from", "source", "cwd", "workdir", "directory", "dir", "folder"]) {
     if (typeof p[key] === "string" && p[key]) out.add(p[key]);
   }
   for (const key of ["paths", "files"]) {
@@ -79,6 +81,9 @@ export default definePluginEntry({
     api.on("before_tool_call", (event, ctx) => {
       const tool = String(event.toolName ?? "");
       if (READ_ONLY_TOOLS.has(tool)) return;
+      // Tool Search's tool_call only forwards to the real tool, and that final call comes back
+      // through this hook with its own name and parameters — that is the card the phone sees.
+      if (tool === "tool_call") return;
       if (tool === "process" && PROCESS_READ_ACTIONS.has(String(event.params?.action ?? ""))) return;
 
       if (readOnly) {
@@ -102,9 +107,13 @@ export default definePluginEntry({
         if (isChainedCommand(event.params)) return { block: true, blockReason: CHAIN_BLOCK_REASON };
       }
 
+      if (tool === OPENCODE_TOOL && !paths.length) {
+        return { block: true, blockReason: "Say which allowed folder the code is in. (코드가 있는 폴더를 알려 주세요)" };
+      }
+
       return {
         requireApproval: {
-          title: clip(EXEC_TOOLS.has(tool) ? "하루 PC · 명령 실행" : `하루 PC · ${tool}`, TITLE_MAX),
+          title: clip(EXEC_TOOLS.has(tool) ? "하루 PC · 명령 실행" : tool === OPENCODE_TOOL ? "하루 PC · 코딩 맡기기 (opencode)" : `하루 PC · ${tool}`, TITLE_MAX),
           description: EXEC_TOOLS.has(tool) ? describeCommand(event.params) : describe(tool, event.params, paths),
           severity: "warning",
           allowedDecisions: ["allow-once", "deny"], // no "always allow" — every change is approved on the phone
@@ -112,6 +121,43 @@ export default definePluginEntry({
         },
       };
     }, { priority: 100 });
+
+    // Coding jobs go to opencode, boxed into one allowed folder (see opencode.js).
+    // The phone approval above is the gate: one card per job, showing the folder and the task.
+    api.registerTool({
+      name: OPENCODE_TOOL,
+      description:
+        "Hand a coding job (fix a bug, add a small feature, explain or tidy code) in ONE project folder to opencode, " +
+        "an open-source coding agent on this computer, and get back its answer and the list of changed files. " +
+        "opencode can only read and edit files inside that folder — no shell, no web, no .git or .env files. " +
+        "Use it for code; use the normal tools for everything else. The person approves each job on the phone.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          folder: { type: "string", description: "The project folder (absolute path, inside the allowed folders)." },
+          task: { type: "string", description: "What to do, in the person's own words plus any detail you know." },
+        },
+        required: ["folder", "task"],
+      },
+      async execute(_id, params, signal) {
+        // Absolute paths only: the approval hook resolves relative paths from the run's folder,
+        // so a relative path here could point somewhere other than what the phone card showed.
+        const raw = expandHome(String(params?.folder ?? ""));
+        if (!path.isAbsolute(raw)) return { content: [{ type: "text", text: "Give the folder as a full path, e.g. ~/Documents/my-app." }] };
+        const folder = path.resolve(raw);
+        const task = String(params?.task ?? "").trim();
+        if (!task) return { content: [{ type: "text", text: "No task given." }] };
+        if (!fs.existsSync(folder) || !fs.statSync(folder).isDirectory()) {
+          return { content: [{ type: "text", text: `Folder not found: ${folder}` }] };
+        }
+        const bin = findOpencode();
+        if (!bin) return { content: [{ type: "text", text: INSTALL_HINT }] };
+        const model = typeof cfg.opencodeModel === "string" && cfg.opencodeModel ? cfg.opencodeModel : undefined;
+        const text = await runOpencode({ bin, folder, task, model, signal });
+        return { content: [{ type: "text", text }] };
+      },
+    });
 
     // Reach this computer from anywhere through the end-to-end encrypted Haru relay
     // (see relay-bridge.js). Started with the gateway, stopped when it drains.

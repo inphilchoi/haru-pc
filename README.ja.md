@@ -132,6 +132,12 @@ Google Gemini は API キーでのみ接続できます。キーは Google AI St
 haru-pc model local           # お使いのパソコンに合ったモデルをおすすめします
 ```
 
+**または無料のクラウドモデル**も登録なしで使えます。OpenCode Zen の「Space Bunny」は期間限定で無料です（終了日は発表されていません）。メッセージは OpenCode のサーバーを経由します。OpenCode は保存せず学習にも使わないとしています。今使っているモデルは予備として残り、無料期間が終わるとそちらに切り替わります。
+
+```bash
+haru-pc model free
+```
+
 ```bash
 haru-pc model                 # 現在のモデルを表示
 ```
@@ -163,6 +169,8 @@ haru-pc skills disable browser
 | `office` | Word、Excel、PowerPoint、PDF の文書を作成・読み込みします |
 | `browser` | 調べものやページの比較を行います。**初期設定ではオフです。** 支払いは一切せず、確認なしにログインすることもありません |
 | `routines` | スケジュールに沿ってタスクを実行します（「毎週月曜 9 時」など） |
+
+**コーディングを任せる:** パソコンに [opencode](https://opencode.ai)（オープンソースのコーディング AI）が入っていれば、許可したフォルダー 1 つのコーディング作業を Haru PC が opencode に任せられます。例:「~/Documents/my-app のログインのバグを直して」。作業ごとにスマホで承認し、opencode はそのフォルダー内のファイルの読み取りと編集だけができます（コマンド実行・インターネット・`.git`・`.env` ファイルは禁止）。終わると変更したファイルをお知らせします。opencode はパソコンで `curl -fsSL https://opencode.ai/install | bash` でインストールします。
 
 Haru PC には独自に審査済みのスキルが付属しており、公開マーケットプレイスのスキルを自分でインストールすることはありません。新しいものをインストールするには、必ずスマホでの承認が必要です。
 

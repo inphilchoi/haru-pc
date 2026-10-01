@@ -132,6 +132,12 @@ Google Gemini se connecte uniquement avec une clé d'API. Vous pouvez obtenir un
 haru-pc model local           # recommande un modèle adapté à votre ordinateur
 ```
 
+**Ou un modèle cloud gratuit**, sans inscription : « Space Bunny » d'OpenCode Zen est gratuit pour une durée limitée (aucune date de fin annoncée). Vos messages passent par les serveurs d'OpenCode, qui indique ne pas les conserver ni les utiliser pour l'entraînement. Votre modèle actuel reste en secours et prend le relais à la fin de la période gratuite.
+
+```bash
+haru-pc model free
+```
+
 ```bash
 haru-pc model                 # affiche le modèle actuel
 ```
@@ -163,6 +169,8 @@ Compétences par défaut :
 | `office` | Créer et lire des documents Word, Excel, PowerPoint et PDF |
 | `browser` | Faire des recherches et comparer des pages. **Désactivée par défaut.** Ne paie jamais et ne se connecte jamais à un compte sans vous le demander |
 | `routines` | Exécuter une tâche selon un planning (« tous les lundis à 9 h ») |
+
+**Tâches de programmation :** si [opencode](https://opencode.ai) (un agent de programmation open source) est installé sur l'ordinateur, Haru PC peut lui confier une tâche de programmation dans un dossier autorisé, par exemple « corrige le bug de connexion dans ~/Documents/my-app ». Vous approuvez chaque tâche sur le téléphone ; opencode peut seulement lire et modifier les fichiers de ce dossier (pas de commandes, pas d'internet, pas de fichiers `.git` ni `.env`), et Haru PC vous indique les fichiers modifiés. Installez opencode sur l'ordinateur avec `curl -fsSL https://opencode.ai/install | bash`.
 
 Haru PC est livré avec ses propres compétences, relues et vérifiées, et n'installe jamais de lui-même des compétences issues des marketplaces publiques. Toute nouvelle installation doit être approuvée sur votre téléphone.
 

@@ -26,6 +26,8 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc model login copilot  sign in with GitHub Copilot
   haru-pc model key <provider> use an API key: openai, anthropic, gemini, mistral, deepseek…
   haru-pc model local          free local model on this computer
+  haru-pc model free           free cloud model (OpenCode Zen "Space Bunny", limited time) — your
+                               current model stays as the backup when the free period ends
 
   haru-pc allow <folder>       let Haru PC work in another folder
   haru-pc readonly on|off      block every change (recommended with small local models)
@@ -46,14 +48,16 @@ Which AI should Haru PC use?
   3) GitHub Copilot — sign in
   4) API key — OpenAI, Anthropic, Gemini (free key), Mistral, DeepSeek…
   5) Local model — free, private, slower (16 GB RAM or more recommended)
+  6) Free cloud model — OpenCode Zen "Space Bunny", no sign-up, free for a limited time
 EOF
-  read -r -p "Choose 1-5: " n
+  read -r -p "Choose 1-6: " n
   case "$n" in
     1) "$0" model login chatgpt ;;
     2) "$0" model login claude ;;
     3) "$0" model login copilot ;;
     4) read -r -p "Provider (openai, anthropic, gemini, mistral, deepseek, …): " p; "$0" model key "$p" ;;
     5) "$0" model local ;;
+    6) "$0" model free ;;
     *) say "Skipped. Run: haru-pc model choose" ;;
   esac
 }
@@ -91,6 +95,22 @@ case "$cmd" in
         p="${1:-}"; [ -n "$p" ] || { say "Use: haru-pc model key <provider>"; exit 2; }
         say "Paste your $p API key when asked. It's stored in this computer's secure storage."
         oc onboard --auth-choice "${p}-api-key" --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace" ;;
+      free)
+        # OpenCode Zen's free models need no account: the key "public" is what opencode itself sends.
+        # The free period has no announced end, so the model you had before becomes the backup —
+        # when Zen stops answering (401), OpenClaw moves on to it (checked 2026-10-01).
+        free="opencode/space-bunny-free"
+        prev="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
+        oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon \
+          --auth-choice opencode-zen --opencode-zen-api-key public --workspace "$HARU_HOME/workspace" >/dev/null
+        oc config set agents.defaults.model.primary "$free" >/dev/null
+        if [ -n "$prev" ] && [ "$prev" != "$free" ]; then
+          oc config set agents.defaults.model.fallbacks "[\"$prev\"]" --json >/dev/null
+          say "Free model on. When the free period ends, Haru PC goes back to: $prev"
+        else
+          say "Free model on. It's free for a limited time — when it ends, choose another with: haru-pc model choose"
+        fi
+        say "Your messages to Haru PC go through OpenCode's servers (they say: not stored, not used for training)." ;;
       local)
         oc plugins install @openclaw/llama-cpp-provider --accept-capabilities >/dev/null 2>&1 || true
         oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace"

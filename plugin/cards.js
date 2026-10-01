@@ -23,6 +23,14 @@ const ACTION_NAMES = {
 /** Short, human card text: what will happen, to which files — plain lines, not JSON. */
 export function describe(tool, params, paths) {
   const p = params ?? {};
+  if (tool === "code_with_opencode") {
+    return clip([
+      "opencode 로 코드 고치기 / Code with opencode",
+      `폴더 / Folder: ${paths[0] ?? p.folder ?? "?"}`,
+      `할 일 / Task: ${clip(String(p.task ?? "").replace(/\s+/g, " ").trim(), 280)}`,
+      "이 폴더 안 파일만 고쳐요 — 명령 실행·인터넷·폴더 밖·.git·.env 는 막혀 있어요. 끝나면 바뀐 파일을 알려 드려요.",
+    ].join("\n"), DESC_MAX);
+  }
   const lines = [ACTION_NAMES[tool] ?? `${tool}`];
   if (paths.length) lines.push(`대상 / Target: ${paths.slice(0, 5).join(", ")}${paths.length > 5 ? ` (+${paths.length - 5})` : ""}`);
   for (const k of ["content", "contents", "text", "data", "body"]) {

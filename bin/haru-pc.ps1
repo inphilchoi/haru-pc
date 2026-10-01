@@ -23,13 +23,14 @@ switch ($cmd) {
     switch ($a1) {
       ''       { Oc config get agents.defaults.model }
       'choose' {
-        Write-Host "1) ChatGPT  2) Claude  3) GitHub Copilot  4) API key  5) Local model (free, 16 GB RAM+)"
-        switch (Read-Host 'Choose 1-5') {
+        Write-Host "1) ChatGPT  2) Claude  3) GitHub Copilot  4) API key  5) Local model (free, 16 GB RAM+)  6) Free cloud model (OpenCode Zen, limited time)"
+        switch (Read-Host 'Choose 1-6') {
           '1' { & $PSCommandPath model login chatgpt }
           '2' { & $PSCommandPath model login claude }
           '3' { & $PSCommandPath model login copilot }
           '4' { $p = Read-Host 'Provider (openai, anthropic, gemini, mistral, deepseek…)'; & $PSCommandPath model key $p }
           '5' { & $PSCommandPath model local }
+          '6' { & $PSCommandPath model free }
           default { Say 'Skipped. Run: haru-pc model choose' }
         }
       }
@@ -47,13 +48,26 @@ switch ($cmd) {
         }
       }
       'key'   { if (-not $a2) { Say 'Use: haru-pc model key <provider>'; exit 2 }; Say "Paste your $a2 API key when asked."; Oc onboard --auth-choice "$a2-api-key" --skip-health --no-install-daemon --workspace $Ws }
+      'free' {
+        # Same as bin/haru-pc: no account needed ("public" key); the current model becomes the backup.
+        $free = 'opencode/space-bunny-free'
+        $prev = ''
+        try { $prev = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        Oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice opencode-zen --opencode-zen-api-key public --workspace $Ws | Out-Null
+        Oc config set agents.defaults.model.primary $free | Out-Null
+        if ($prev -and $prev -ne $free -and $prev -notmatch 'unset') {
+          Oc config set agents.defaults.model.fallbacks ('["' + $prev + '"]') --json | Out-Null
+          Say "Free model on. When the free period ends, Haru PC goes back to: $prev"
+        } else { Say 'Free model on. It is free for a limited time - when it ends, choose another with: haru-pc model choose' }
+        Say "Your messages to Haru PC go through OpenCode's servers (they say: not stored, not used for training)."
+      }
       'local' {
         Oc plugins install '@openclaw/llama-cpp-provider' --accept-capabilities | Out-Null
         Oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace $Ws
         Oc config set plugins.entries.haru-pc.config.readOnly true | Out-Null
         Say 'Small local models are easier to trick, so read-only mode is on. Turn it off with: haru-pc readonly off'
       }
-      default { Say 'Use: haru-pc model [choose|login|key|local]'; exit 2 }
+      default { Say 'Use: haru-pc model [choose|login|key|local|free]'; exit 2 }
     }
   }
   'allow' {
@@ -91,7 +105,7 @@ switch ($cmd) {
     Write-Host @'
 Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc pair | approve | unpair | status | logs
-  haru-pc model [choose | login chatgpt|claude|copilot | key <provider> | local]
+  haru-pc model [choose | login chatgpt|claude|copilot | key <provider> | local | free]
   haru-pc allow <folder> | readonly on|off | skills [enable|disable <name>]
   haru-pc relay on|off|status|url <wss://…> | remote on|off | update | uninstall
 '@
