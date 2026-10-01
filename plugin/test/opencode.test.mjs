@@ -8,9 +8,12 @@ import { describe } from "../cards.js";
 
 test("opencode is boxed in: no shell, no web, nothing outside the folder, no .git/.env", () => {
   const p = SAFE_CONFIG.permission;
-  for (const k of ["bash", "webfetch", "websearch", "external_directory", "task", "skill", "question", "doom_loop"]) {
+  for (const k of ["webfetch", "websearch", "external_directory", "task", "skill", "question", "doom_loop"]) {
     assert.equal(p[k], "deny", k);
   }
+  // shell: "ask" is auto-rejected by `opencode run` — only true while we never pass --auto
+  assert.equal(p.bash, "ask");
+  assert.ok(!buildRun({ folder: "/x", task: "t" }, {}).args.includes("--auto"));
   assert.equal(p.edit["*"], "allow");
   for (const k of ["*.env", "*.env.*", ".git/*", "*/.git/*"]) assert.equal(p.edit[k], "deny", k);
   assert.equal(SAFE_CONFIG.share, "disabled");

@@ -2,7 +2,7 @@
 // (https://opencode.ai) and reports back what changed. Kept free of OpenClaw imports so it can be tested alone.
 //
 // One phone approval covers one job, so opencode itself is boxed in for that run (checked on 2026-10-01):
-// it may read and edit files inside the folder only — no shell, no web, nothing outside the folder,
+// it may read and edit files inside the folder only — no shell (asked, and auto-rejected), no web, nothing outside the folder,
 // no .git or .env files. Our settings are passed inline (OPENCODE_CONFIG_CONTENT), and they win over
 // an opencode.json shipped inside the project, so a downloaded repo cannot re-open the shell.
 import fs from "node:fs";
@@ -19,7 +19,12 @@ export const SAFE_CONFIG = Object.freeze({
   permission: {
     edit: { "*": "allow", "*.env": "deny", "*.env.*": "deny", ".git/*": "deny", "*/.git/*": "deny" },
     read: "allow", glob: "allow", grep: "allow", list: "allow", lsp: "allow", todowrite: "allow",
-    bash: "deny", webfetch: "deny", websearch: "deny", external_directory: "deny",
+    // "ask", not "deny": `opencode run` (no --auto, which we never pass) auto-rejects every ask, so no
+    // command runs either way — but with bash denied outright OpenCode's free models refuse the request
+    // ("free tier can only be used from within OpenCode"; Space Bunny is the only one that still answers).
+    // Checked 2026-10-01: "permission requested: bash (touch …); auto-rejecting", file not created.
+    bash: "ask",
+    webfetch: "deny", websearch: "deny", external_directory: "deny",
     task: "deny", skill: "deny", question: "deny", doom_loop: "deny",
   },
 });
