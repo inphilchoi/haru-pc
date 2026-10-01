@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SAFE_CONFIG, buildRun, changedFiles, findOpencode, report, snapshot, stripAnsi } from "../opencode.js";
+import { SAFE_CONFIG, TOOL_NOTE, buildRun, changedFiles, findOpencode, report, snapshot, stripAnsi } from "../opencode.js";
 import { describe } from "../cards.js";
 
 test("opencode is boxed in: no shell, no web, nothing outside the folder, no .git/.env", () => {
@@ -21,16 +21,16 @@ test("opencode is boxed in: no shell, no web, nothing outside the folder, no .gi
 
 test("the boxed-in settings go inline, so a project's own opencode.json can't loosen them", () => {
   const { args, env } = buildRun({ folder: "/x/app", task: "fix the login bug" }, { PATH: "/bin" });
-  assert.deepEqual(args, ["run", "--dir", "/x/app", "--title", "Haru PC", "fix the login bug"]);
+  assert.deepEqual(args, ["run", "--dir", "/x/app", "--title", "Haru PC", TOOL_NOTE + "fix the login bug"]);
   assert.deepEqual(JSON.parse(env.OPENCODE_CONFIG_CONTENT), JSON.parse(JSON.stringify(SAFE_CONFIG)));
   assert.equal(env.PATH, "/bin");
   const withModel = buildRun({ folder: "/x", task: "t", model: "opencode/space-bunny-free" }, {});
-  assert.deepEqual(withModel.args.slice(-3), ["--model", "opencode/space-bunny-free", "t"]);
+  assert.deepEqual(withModel.args.slice(-3), ["--model", "opencode/space-bunny-free", TOOL_NOTE + "t"]);
 });
 
 test("the task is one argument, never parsed by a shell", () => {
   const task = "고쳐 줘; rm -rf ~ && $(whoami) | cat";
-  assert.equal(buildRun({ folder: "/x", task }, {}).args.at(-1), task);
+  assert.equal(buildRun({ folder: "/x", task }, {}).args.at(-1), TOOL_NOTE + task);
 });
 
 test("finds opencode on PATH or in ~/.opencode/bin", () => {

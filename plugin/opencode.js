@@ -46,11 +46,16 @@ export function findOpencode(env = process.env, exists = fs.existsSync) {
   return null;
 }
 
+// Told up front: some models try `ls` first and simply stop when it is refused (seen with Space Bunny, 10/1).
+export const TOOL_NOTE =
+  "[Haru PC] Shell commands are not available here and will be refused. " +
+  "Use only the file tools (list, glob, grep, read, edit, write) inside this folder.\n\n";
+
 /** Command line and environment for one boxed-in run. */
 export function buildRun({ folder, task, model }, env = process.env) {
   const args = ["run", "--dir", folder, "--title", "Haru PC"];
   if (model) args.push("--model", model);
-  args.push(task);
+  args.push(TOOL_NOTE + task);
   return { args, env: { ...env, OPENCODE_CONFIG_CONTENT: JSON.stringify(SAFE_CONFIG) } };
 }
 
