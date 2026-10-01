@@ -116,6 +116,7 @@ Choisissez-en un lors de l'installation ; vous pourrez en changer à tout moment
 |---|---|
 | **ChatGPT** (OpenAI) | `haru-pc model login chatgpt`, puis connectez-vous sur la page d'OpenAI. Les limites de votre forfait ChatGPT s'appliquent |
 | **Claude** (Anthropic) | Connectez-vous une fois avec la CLI Claude officielle d'Anthropic (`claude auth login`), puis exécutez `haru-pc model login claude`. Les limites de votre forfait Claude s'appliquent. Vérifiez les conditions actuelles d'Anthropic concernant l'utilisation de votre forfait avec d'autres outils |
+| **Grok** (xAI) | `haru-pc model login grok`, puis connectez-vous sur la page de xAI (SuperGrok ou X Premium). Ou avec une clé API : `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot`, puis saisissez le code affiché sur la page de GitHub |
 
 **Ou utilisez une clé d'API** (Anthropic, OpenAI, Google Gemini, Mistral, DeepSeek, entre autres) :
@@ -126,6 +127,8 @@ haru-pc model key gemini
 ```
 
 Google Gemini se connecte uniquement avec une clé d'API. Vous pouvez obtenir une clé gratuite dans Google AI Studio.
+
+Meta (Llama, Muse) se connecte lui aussi uniquement avec une clé API : `haru-pc model key meta`.
 
 **Ou exécutez un modèle local** sur votre ordinateur. C'est gratuit et privé :
 

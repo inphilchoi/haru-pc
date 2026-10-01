@@ -23,33 +23,75 @@ switch ($cmd) {
     switch ($a1) {
       ''       { Oc config get agents.defaults.model }
       'choose' {
-        Write-Host "1) ChatGPT  2) Claude  3) GitHub Copilot  4) API key  5) Local model (free, 16 GB RAM+)  6) Free cloud model (OpenCode Zen, limited time) [Enter]"
-        $n = ''; try { $n = Read-Host 'Choose 1-6 [6]' } catch {}
+        Write-Host @'
+Which AI should Haru PC use?
+  1) ChatGPT (OpenAI)      - sign in with your plan, or an API key
+  2) Claude (Anthropic)    - sign in with your plan, or an API key
+  3) Gemini (Google)       - API key (free key at aistudio.google.com/apikey)
+  4) Grok (xAI)            - sign in with SuperGrok / X Premium, or an API key
+  5) Meta (Llama / Muse)   - API key
+  6) Free cloud model      - OpenCode Zen "Space Bunny", no sign-up, limited time  (Enter)
+  7) GitHub Copilot        - sign in
+  8) Other API key         - Mistral, DeepSeek, OpenRouter...
+  9) Local model           - free, private, slower (16 GB RAM or more recommended)
+Sign-ins happen on each company's own page. Haru PC never asks for your password.
+'@
+        $n = ''; try { $n = Read-Host 'Choose 1-9 [6]' } catch {}
         if (-not $n) { $n = '6' }
+        function How($prov) {
+          $h = ''; try { $h = Read-Host '  1) Sign in with your account   2) API key   [1]' } catch {}
+          if ($h -eq '2') { & $PSCommandPath model key $prov } else { & $PSCommandPath model login $prov }
+        }
         switch ($n) {
-          '1' { & $PSCommandPath model login chatgpt }
-          '2' { & $PSCommandPath model login claude }
-          '3' { & $PSCommandPath model login copilot }
-          '4' { $p = Read-Host 'Provider (openai, anthropic, gemini, mistral, deepseek…)'; & $PSCommandPath model key $p }
-          '5' { & $PSCommandPath model local }
+          '1' { How 'chatgpt' }
+          '2' { How 'claude' }
+          '3' { & $PSCommandPath model key gemini }
+          '4' { How 'grok' }
+          '5' { & $PSCommandPath model key meta }
           '6' { & $PSCommandPath model free }
+          '7' { & $PSCommandPath model login copilot }
+          '8' { $p = Read-Host 'Provider (mistral, deepseek, openrouter...)'; & $PSCommandPath model key $p }
+          '9' { & $PSCommandPath model local }
           default { Say 'Not a choice - starting with the free model. Change any time: haru-pc model choose'; & $PSCommandPath model free }
         }
       }
       'login' {
+        # A sign-in keeps an existing main model, so clear it first (and put it back if the sign-in fails).
+        $prev = ''; try { $prev = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        if ($prev -match 'unset') { $prev = '' }
+        function Clear-Main { try { Oc config unset agents.defaults.model.primary | Out-Null } catch {} }
+        function Check-Main {
+          $now = ''; try { $now = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+          if ($now -and $now -notmatch 'unset') { Say "Now using: $now" }
+          else { if ($prev) { Oc config set agents.defaults.model.primary $prev | Out-Null }; Say "Sign-in didn't finish. Still using: $prev"; exit 1 }
+        }
         switch ($a2) {
-          'chatgpt' { Say "OpenAI's sign-in page will open. Enter your ID and password there, not here."; Oc models auth login --provider openai }
-          'claude'  {
+          { $_ -in 'chatgpt','openai' } { Say "OpenAI's sign-in page will open. Enter your ID and password there, not here."; Clear-Main; try { Oc models auth login --provider openai } catch {}; Check-Main }
+          { $_ -in 'claude','anthropic' } {
             if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { Say "First sign in to Claude's official app: claude auth login"; exit 1 }
             & claude auth status | Out-Null; if ($LASTEXITCODE -ne 0) { Say "First sign in to Claude's official app: claude auth login"; exit 1 }
             Oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice anthropic-cli --workspace $Ws
             Say "Claude connected. Your Claude plan's limits apply. Please check Anthropic's current terms for using your plan with other tools."
+            Check-Main
           }
-          'copilot' { Oc models auth login-github-copilot }
-          default   { Say 'Use: haru-pc model login chatgpt|claude|copilot'; exit 2 }
+          { $_ -in 'grok','xai' } { Say "xAI's sign-in page will open (SuperGrok or X Premium). Enter your details there, not here."; Clear-Main; try { Oc models auth login --provider xai --method oauth } catch {}; Check-Main }
+          'copilot' { Clear-Main; try { Oc models auth login-github-copilot } catch {}; Check-Main }
+          { $_ -in 'gemini','google' } { Say 'Google no longer offers account sign-in for tools like this (ended June 18, 2026). Get a free key at https://aistudio.google.com/apikey, then run: haru-pc model key gemini'; exit 2 }
+          { $_ -in 'meta','llama' } { Say 'Meta offers API keys only. Run: haru-pc model key meta'; exit 2 }
+          default   { Say 'Use: haru-pc model login chatgpt|claude|grok|copilot'; exit 2 }
         }
       }
-      'key'   { if (-not $a2) { Say 'Use: haru-pc model key <provider>'; exit 2 }; Say "Paste your $a2 API key when asked."; Oc onboard --auth-choice "$a2-api-key" --skip-health --no-install-daemon --workspace $Ws }
+      'key' {
+        if (-not $a2) { Say 'Use: haru-pc model key <provider>'; exit 2 }
+        $choice = switch ($a2) { { $_ -in 'chatgpt','openai' } { 'openai-api-key' } { $_ -in 'claude','anthropic' } { 'apiKey' } { $_ -in 'gemini','google' } { 'gemini-api-key' } { $_ -in 'grok','xai' } { 'xai-api-key' } { $_ -in 'meta','llama' } { 'meta-api-key' } default { "$a2-api-key" } }
+        Say "Paste your $a2 API key when asked. It's stored in this computer's secure storage."
+        $prev = ''; try { $prev = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        if ($prev -match 'unset') { $prev = '' }
+        try { Oc config unset agents.defaults.model.primary | Out-Null } catch {}
+        try { Oc onboard --auth-choice $choice --skip-health --no-install-daemon --workspace $Ws } catch {}
+        $now = ''; try { $now = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        if ($now -and $now -notmatch 'unset') { Say "Now using: $now" } else { if ($prev) { Oc config set agents.defaults.model.primary $prev | Out-Null }; Say "Key setup didn't finish. Still using: $prev"; exit 1 }
+      }
       'free' {
         # Same as bin/haru-pc: no account needed ("public" key); the current model becomes the backup.
         $free = 'opencode/space-bunny-free'
@@ -117,7 +159,7 @@ switch ($cmd) {
     Write-Host @'
 Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc pair | approve | unpair | status | logs
-  haru-pc model [choose | login chatgpt|claude|copilot | key <provider> | local | free | check]
+  haru-pc model [choose | login chatgpt|claude|grok|copilot | key <provider> | local | free | check]
   haru-pc allow <folder> | readonly on|off | skills [enable|disable <name>]
   haru-pc relay on|off|status|url <wss://…> | remote on|off | update | uninstall
 '@

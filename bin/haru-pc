@@ -23,8 +23,9 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc model choose         choose a model (menu)
   haru-pc model login chatgpt  sign in with your ChatGPT plan (OpenAI's own page)
   haru-pc model login claude   use your Claude plan (after `claude auth login`)
+  haru-pc model login grok     sign in with SuperGrok / X Premium (xAI's own page)
   haru-pc model login copilot  sign in with GitHub Copilot
-  haru-pc model key <provider> use an API key: openai, anthropic, gemini, mistral, deepseek…
+  haru-pc model key <provider> use an API key: chatgpt, claude, gemini, grok, meta, mistral, deepseek…
   haru-pc model local          free local model on this computer
   haru-pc model free           free cloud model (OpenCode Zen "Space Bunny", limited time) — your
                                current model stays as the backup when the free period ends
@@ -61,22 +62,33 @@ fallback_list() {
 model_choose() {
   cat <<'EOF'
 Which AI should Haru PC use?
-  1) ChatGPT — sign in with your ChatGPT plan
-  2) Claude — use your Claude plan (Claude app must be signed in on this computer)
-  3) GitHub Copilot — sign in
-  4) API key — OpenAI, Anthropic, Gemini (free key), Mistral, DeepSeek…
-  5) Local model — free, private, slower (16 GB RAM or more recommended)
-  6) Free cloud model — OpenCode Zen "Space Bunny", no sign-up, free for a limited time  (Enter)
+  1) ChatGPT (OpenAI)      — sign in with your plan, or an API key
+  2) Claude (Anthropic)    — sign in with your plan, or an API key
+  3) Gemini (Google)       — API key (free key at aistudio.google.com/apikey)
+  4) Grok (xAI)            — sign in with SuperGrok / X Premium, or an API key
+  5) Meta (Llama / Muse)   — API key
+  6) Free cloud model      — OpenCode Zen "Space Bunny", no sign-up, limited time  (Enter)
+  7) GitHub Copilot        — sign in
+  8) Other API key         — Mistral, DeepSeek, OpenRouter…
+  9) Local model           — free, private, slower (16 GB RAM or more recommended)
+Sign-ins happen on each company's own page. Haru PC never asks for your password.
 EOF
-  read -r -p "Choose 1-6 [6]: " n || n=6
+  read -r -p "Choose 1-9 [6]: " n || n=6
   n="${n:-6}"
+  how() {  # $1 = provider; asks sign-in (1) or API key (2)
+    local h; read -r -p "  1) Sign in with your account   2) API key   [1]: " h || h=1
+    if [ "${h:-1}" = 2 ]; then "$0" model key "$1"; else "$0" model login "$1"; fi
+  }
   case "$n" in
-    1) "$0" model login chatgpt ;;
-    2) "$0" model login claude ;;
-    3) "$0" model login copilot ;;
-    4) read -r -p "Provider (openai, anthropic, gemini, mistral, deepseek, …): " p; "$0" model key "$p" ;;
-    5) "$0" model local ;;
+    1) how chatgpt ;;
+    2) how claude ;;
+    3) "$0" model key gemini ;;
+    4) how grok ;;
+    5) "$0" model key meta ;;
     6) "$0" model free ;;
+    7) "$0" model login copilot ;;
+    8) read -r -p "Provider (mistral, deepseek, openrouter, …): " p; "$0" model key "$p" ;;
+    9) "$0" model local ;;
     *) say "Not a choice — starting with the free model. Change any time: haru-pc model choose"; "$0" model free ;;
   esac
 }
@@ -97,23 +109,58 @@ case "$cmd" in
       show)   oc config get agents.defaults.model ;;
       choose) model_choose ;;
       login)
+        # A sign-in keeps an existing main model, so clear it first (and put it back if the sign-in fails).
+        prev="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
+        switch_to() { oc config unset agents.defaults.model.primary >/dev/null 2>&1 || true; }
+        signed_in() {
+          now="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
+          if [ -n "$now" ]; then say "Now using: $now"; return 0; fi
+          [ -n "$prev" ] && oc config set agents.defaults.model.primary "$prev" >/dev/null
+          say "Sign-in didn't finish. Still using: ${prev:-no model}"; return 1
+        }
         case "${1:-}" in
-          chatgpt) say "OpenAI's sign-in page will open. Enter your ID and password there, not here."
-                   oc models auth login --provider openai ;;
-          claude)  if ! command -v claude >/dev/null || ! claude auth status >/dev/null 2>&1; then
+          chatgpt|openai)
+                   say "OpenAI's sign-in page will open. Enter your ID and password there, not here."
+                   switch_to; oc models auth login --provider openai || true; signed_in ;;
+          claude|anthropic)
+                   if ! command -v claude >/dev/null || ! claude auth status >/dev/null 2>&1; then
                      say "First sign in to Claude's official app: run  claude auth login  (you enter your details on Anthropic's page)."
                      exit 1
                    fi
                    oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice anthropic-cli \
                      --workspace "$HARU_HOME/workspace"
-                   say "Claude connected. Your Claude plan's limits apply. Please check Anthropic's current terms for using your plan with other tools." ;;
-          copilot) oc models auth login-github-copilot ;;
-          *) say "Use: haru-pc model login chatgpt|claude|copilot"; exit 2 ;;
+                   say "Claude connected. Your Claude plan's limits apply. Please check Anthropic's current terms for using your plan with other tools."
+                   signed_in ;;
+          grok|xai)
+                   say "xAI's sign-in page will open (SuperGrok or X Premium). Enter your details there, not here."
+                   switch_to; oc models auth login --provider xai --method oauth || true; signed_in ;;
+          copilot) switch_to; oc models auth login-github-copilot || true; signed_in ;;
+          gemini|google)
+                   say "Google no longer offers account sign-in for tools like this (ended June 18, 2026). Use a free API key instead:"
+                   say "  get one at https://aistudio.google.com/apikey, then run: haru-pc model key gemini"; exit 2 ;;
+          meta|llama)
+                   say "Meta offers API keys only. Run: haru-pc model key meta"; exit 2 ;;
+          *) say "Use: haru-pc model login chatgpt|claude|grok|copilot"; exit 2 ;;
         esac ;;
       key)
         p="${1:-}"; [ -n "$p" ] || { say "Use: haru-pc model key <provider>"; exit 2; }
+        case "$p" in   # friendly names → OpenClaw's auth choices
+          chatgpt|openai) choice=openai-api-key ;;
+          claude|anthropic) choice=apiKey ;;
+          gemini|google) choice=gemini-api-key ;;
+          grok|xai) choice=xai-api-key ;;
+          meta|llama) choice=meta-api-key ;;
+          *) choice="${p}-api-key" ;;
+        esac
         say "Paste your $p API key when asked. It's stored in this computer's secure storage."
-        oc onboard --auth-choice "${p}-api-key" --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace" ;;
+        # Some providers keep the current main model on setup (xAI did, 10/1) — clear it so the new key is used,
+        # and put the old one back if setup doesn't finish.
+        prev="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
+        oc config unset agents.defaults.model.primary >/dev/null 2>&1 || true
+        oc onboard --auth-choice "$choice" --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace" || true
+        now="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
+        if [ -n "$now" ]; then say "Now using: $now"
+        else [ -n "$prev" ] && oc config set agents.defaults.model.primary "$prev" >/dev/null; say "Key setup didn't finish. Still using: ${prev:-no model}"; exit 1; fi ;;
       free)
         # OpenCode Zen's free models need no account: the key "public" is what opencode itself sends.
         # The free period has no announced end, so the model you had before becomes the backup —

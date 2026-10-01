@@ -116,6 +116,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 |---|---|
 | **ChatGPT**（OpenAI） | 运行 `haru-pc model login chatgpt`，然后在 OpenAI 的页面上登录。使用额度以你的 ChatGPT 套餐为准 |
 | **Claude**（Anthropic） | 先用 Anthropic 官方的 Claude CLI 登录一次（`claude auth login`），再运行 `haru-pc model login claude`。使用额度以你的 Claude 套餐为准。关于在其他工具中使用你的套餐，请查阅 Anthropic 的最新条款 |
+| **Grok**（xAI） | 运行 `haru-pc model login grok`，在 xAI 页面登录（SuperGrok 或 X Premium）。也可用 API 密钥：`haru-pc model key grok` |
 | **GitHub Copilot** | 运行 `haru-pc model login copilot`，然后在 GitHub 页面上输入显示的验证码 |
 
 **也可以使用 API 密钥**（Anthropic、OpenAI、Google Gemini、Mistral、DeepSeek 等）：
@@ -126,6 +127,8 @@ haru-pc model key gemini
 ```
 
 Google Gemini 只能通过 API 密钥连接，可以在 Google AI Studio 免费获取密钥。
+
+Meta（Llama、Muse）同样只能用 API 密钥连接：`haru-pc model key meta`。
 
 **还可以在你的电脑上运行本地模型**，免费又私密：
 

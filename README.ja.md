@@ -116,6 +116,7 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 |---|---|
 | **ChatGPT**（OpenAI） | `haru-pc model login chatgpt` を実行し、OpenAI のページでサインインします。ご契約中の ChatGPT プランの利用上限が適用されます |
 | **Claude**（Anthropic） | Anthropic 公式の Claude CLI で一度サインインしてから（`claude auth login`）、`haru-pc model login claude` を実行します。ご契約中の Claude プランの利用上限が適用されます。プランをほかのツールで使うことについては、Anthropic の最新の規約をご確認ください |
+| **Grok** (xAI) | `haru-pc model login grok` を実行し、xAI のページでサインイン（SuperGrok または X Premium）。API キーなら `haru-pc model key grok` |
 | **GitHub Copilot** | `haru-pc model login copilot` を実行し、GitHub のページに表示されたコードを入力します |
 
 **API キーを使うこともできます**（Anthropic、OpenAI、Google Gemini、Mistral、DeepSeek など）。
@@ -126,6 +127,8 @@ haru-pc model key gemini
 ```
 
 Google Gemini は API キーでのみ接続できます。キーは Google AI Studio で無料で取得できます。
+
+Meta（Llama・Muse）も API キーでのみ接続できます: `haru-pc model key meta`。
 
 **パソコン上でローカルモデルを動かすこともできます。** 無料でプライベートです。
 
