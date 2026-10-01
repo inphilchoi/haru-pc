@@ -170,7 +170,7 @@ Habilidades padrão:
 | `browser` | Pesquisar e comparar páginas. **Desativada por padrão.** Nunca faz pagamentos e nunca faz login sem perguntar |
 | `routines` | Executar uma tarefa em horários programados ("toda segunda às 9h") |
 
-**Tarefas de programação:** se o [opencode](https://opencode.ai) (um agente de programação de código aberto) estiver instalado no computador, o Haru PC pode passar a ele uma tarefa de programação em uma pasta permitida, por exemplo "corrija o bug de login em ~/Documents/my-app". Você aprova cada tarefa no celular; o opencode só pode ler e editar arquivos dentro dessa pasta (sem comandos, sem internet, sem arquivos `.git` ou `.env`), e o Haru PC informa quais arquivos mudaram. Instale o opencode no computador com `curl -fsSL https://opencode.ai/install | bash`.
+**Tarefas de programação:** se o [opencode](https://opencode.ai) (um agente de programação de código aberto) estiver instalado no computador, o Haru PC pode passar a ele uma tarefa de programação em uma pasta permitida, por exemplo "corrija o bug de login em ~/Documents/my-app". Você aprova cada tarefa no celular; o opencode só pode ler e editar arquivos dentro dessa pasta (sem comandos, sem internet, sem arquivos `.git` ou `.env`), e o Haru PC informa quais arquivos mudaram. Instale o opencode no computador com `curl -fsSL https://opencode.ai/install | bash`. Detalhes: [docs/opencode.md](docs/opencode.md) (em inglês).
 
 O Haru PC já vem com as próprias habilidades, revisadas, e nunca instala sozinho habilidades de marketplaces públicos. Qualquer instalação nova precisa da sua aprovação no celular.
 

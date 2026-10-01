@@ -170,7 +170,7 @@ haru-pc skills disable browser
 | `browser` | 정보를 찾아보고 페이지를 비교해요. **기본값은 꺼짐이에요.** 결제는 절대 하지 않고, 묻지 않고 로그인하지 않아요 |
 | `routines` | 정해진 일정에 따라 작업을 실행해요("매주 월요일 9시") |
 
-**코딩 맡기기:** 컴퓨터에 [opencode](https://opencode.ai)(오픈소스 코딩 AI)가 설치돼 있으면, 하루 PC가 허용한 폴더 하나의 코딩 일을 opencode에 맡길 수 있어요. 예: "~/Documents/my-app 로그인 버그 고쳐 줘". 일마다 폰에서 승인하고, opencode는 그 폴더 안 파일만 읽고 고칠 수 있어요(명령 실행·인터넷·`.git`·`.env` 파일은 막혀 있어요). 끝나면 바뀐 파일을 알려 드려요. opencode는 컴퓨터에서 `curl -fsSL https://opencode.ai/install | bash`로 설치해요.
+**코딩 맡기기:** 컴퓨터에 [opencode](https://opencode.ai)(오픈소스 코딩 AI)가 설치돼 있으면, 하루 PC가 허용한 폴더 하나의 코딩 일을 opencode에 맡길 수 있어요. 예: "~/Documents/my-app 로그인 버그 고쳐 줘". 일마다 폰에서 승인하고, opencode는 그 폴더 안 파일만 읽고 고칠 수 있어요(명령 실행·인터넷·`.git`·`.env` 파일은 막혀 있어요). 끝나면 바뀐 파일을 알려 드려요. opencode는 컴퓨터에서 `curl -fsSL https://opencode.ai/install | bash`로 설치해요. 자세히: [docs/opencode.md](docs/opencode.md)(영어).
 
 하루 PC에는 자체 검토를 거친 스킬이 함께 들어 있고, 공개 마켓플레이스의 스킬을 스스로 설치하는 일은 없어요. 무언가를 새로 설치하려면 휴대폰에서 승인해야 해요.
 

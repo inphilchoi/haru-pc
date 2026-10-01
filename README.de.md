@@ -170,7 +170,7 @@ Standard-Skills:
 | `browser` | Informationen nachschlagen und Seiten vergleichen. **Standardmäßig aus.** Bezahlt nie und meldet sich nie ohne Rückfrage an |
 | `routines` | Eine Aufgabe nach Zeitplan ausführen („jeden Montag um 9 Uhr“) |
 
-**Programmieraufgaben:** Ist [opencode](https://opencode.ai) (ein Open-Source-Coding-Agent) auf dem Computer installiert, kann Haru PC ihm eine Programmieraufgabe in einem freigegebenen Ordner übergeben – etwa „behebe den Login-Fehler in ~/Documents/my-app“. Sie bestätigen jede Aufgabe auf dem Smartphone; opencode darf nur Dateien in diesem Ordner lesen und bearbeiten (keine Befehle, kein Internet, keine `.git`- oder `.env`-Dateien), und Haru PC meldet Ihnen die geänderten Dateien. opencode installieren Sie auf dem Computer mit `curl -fsSL https://opencode.ai/install | bash`.
+**Programmieraufgaben:** Ist [opencode](https://opencode.ai) (ein Open-Source-Coding-Agent) auf dem Computer installiert, kann Haru PC ihm eine Programmieraufgabe in einem freigegebenen Ordner übergeben – etwa „behebe den Login-Fehler in ~/Documents/my-app“. Sie bestätigen jede Aufgabe auf dem Smartphone; opencode darf nur Dateien in diesem Ordner lesen und bearbeiten (keine Befehle, kein Internet, keine `.git`- oder `.env`-Dateien), und Haru PC meldet Ihnen die geänderten Dateien. opencode installieren Sie auf dem Computer mit `curl -fsSL https://opencode.ai/install | bash`. Details: [docs/opencode.md](docs/opencode.md) (Englisch).
 
 Haru PC bringt eigene, geprüfte Skills mit und installiert niemals von sich aus Skills aus öffentlichen Marktplätzen. Jede neue Installation müssen Sie auf dem Smartphone freigeben.
 

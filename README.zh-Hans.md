@@ -170,7 +170,7 @@ haru-pc skills disable browser
 | `browser` | 查资料、比较网页。**默认关闭。** 绝不付款，未经询问绝不登录 |
 | `routines` | 按计划运行任务（“每周一 9 点”） |
 
-**交给它写代码：** 如果电脑上装有 [opencode](https://opencode.ai)（开源编程 AI），Haru PC 可以把某个已允许文件夹里的编程任务交给它，例如“修复 ~/Documents/my-app 的登录错误”。每个任务都要在手机上批准；opencode 只能读取和修改该文件夹内的文件（不能执行命令、不能上网、不能改 `.git` 和 `.env` 文件），完成后 Haru PC 会告诉你改了哪些文件。请在电脑上用 `curl -fsSL https://opencode.ai/install | bash` 安装 opencode。
+**交给它写代码：** 如果电脑上装有 [opencode](https://opencode.ai)（开源编程 AI），Haru PC 可以把某个已允许文件夹里的编程任务交给它，例如“修复 ~/Documents/my-app 的登录错误”。每个任务都要在手机上批准；opencode 只能读取和修改该文件夹内的文件（不能执行命令、不能上网、不能改 `.git` 和 `.env` 文件），完成后 Haru PC 会告诉你改了哪些文件。请在电脑上用 `curl -fsSL https://opencode.ai/install | bash` 安装 opencode。详情见 [docs/opencode.md](docs/opencode.md)（英文）。
 
 Haru PC 自带经过自家审核的技能，绝不会自行安装来自公共技能市场的技能。安装任何新内容，都需要你在手机上批准。
 

@@ -170,7 +170,7 @@ haru-pc skills disable browser
 | `browser` | 調べものやページの比較を行います。**初期設定ではオフです。** 支払いは一切せず、確認なしにログインすることもありません |
 | `routines` | スケジュールに沿ってタスクを実行します（「毎週月曜 9 時」など） |
 
-**コーディングを任せる:** パソコンに [opencode](https://opencode.ai)（オープンソースのコーディング AI）が入っていれば、許可したフォルダー 1 つのコーディング作業を Haru PC が opencode に任せられます。例:「~/Documents/my-app のログインのバグを直して」。作業ごとにスマホで承認し、opencode はそのフォルダー内のファイルの読み取りと編集だけができます（コマンド実行・インターネット・`.git`・`.env` ファイルは禁止）。終わると変更したファイルをお知らせします。opencode はパソコンで `curl -fsSL https://opencode.ai/install | bash` でインストールします。
+**コーディングを任せる:** パソコンに [opencode](https://opencode.ai)（オープンソースのコーディング AI）が入っていれば、許可したフォルダー 1 つのコーディング作業を Haru PC が opencode に任せられます。例:「~/Documents/my-app のログインのバグを直して」。作業ごとにスマホで承認し、opencode はそのフォルダー内のファイルの読み取りと編集だけができます（コマンド実行・インターネット・`.git`・`.env` ファイルは禁止）。終わると変更したファイルをお知らせします。opencode はパソコンで `curl -fsSL https://opencode.ai/install | bash` でインストールします。詳しくは [docs/opencode.md](docs/opencode.md)（英語）。
 
 Haru PC には独自に審査済みのスキルが付属しており、公開マーケットプレイスのスキルを自分でインストールすることはありません。新しいものをインストールするには、必ずスマホでの承認が必要です。
 
