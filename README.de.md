@@ -141,7 +141,7 @@ haru-pc model free
 
 **Mit dem kostenlosen Modell starten**
 
-1. **Einschalten** — Wählen Sie bei der Installation unter „KI wählen“ **6) Kostenloses Cloud-Modell**, oder führen Sie `haru-pc model free` aus, wenn Haru PC schon installiert ist. Keine Anmeldung, kein Schlüssel, keine Zahlung.
+1. **Einschalten** — Drücken Sie bei der Installation unter „KI wählen“ einfach Enter oder wählen Sie **6) Kostenloses Cloud-Modell**. Ist Haru PC schon installiert, führen Sie `haru-pc model free` aus. Keine Anmeldung, kein Schlüssel, keine Zahlung.
 2. **Prüfen** — `haru-pc model` — sehen Sie `opencode/space-bunny-free`, ist alles bereit. Geben Sie Aufgaben wie gewohnt per Smartphone.
 3. **Wenn die kostenlose Zeit endet** — Haben Sie vorher ein anderes Modell genutzt, wechselt Haru PC automatisch dorthin zurück. Sonst wählen Sie mit `haru-pc model choose` eine andere KI.
 4. **Gut zu wissen** — Ihre Nachrichten laufen über die Server von OpenCode (OpenCode gibt an, nichts zu speichern und nichts zum Training zu verwenden). Das Angebot ist zeitlich begrenzt; ein Enddatum ist nicht bekannt.

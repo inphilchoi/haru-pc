@@ -141,7 +141,7 @@ haru-pc model free
 
 **用免费模型开始**
 
-1. **打开** — 安装时选择 AI 的步骤中选 **6) 免费云端模型**；如果已经装好，运行 `haru-pc model free`。无需注册、密钥或付款。
+1. **打开** — 安装时选择 AI 的步骤中直接按 Enter，或选 **6) 免费云端模型**；如果已经装好，运行 `haru-pc model free`。无需注册、密钥或付款。
 2. **确认** — `haru-pc model` — 看到 `opencode/space-bunny-free` 就完成了。像平常一样在手机上交代就行。
 3. **免费期结束后** — 如果之前用过其他模型，会自动切回那个模型；如果没有，用 `haru-pc model choose` 选择其他 AI。
 4. **须知** — 消息会经过 OpenCode 的服务器（OpenCode 表示不会保存，也不会用于训练）。限时免费，尚未公布结束日期。

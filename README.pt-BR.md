@@ -141,7 +141,7 @@ haru-pc model free
 
 **Começar com o modelo gratuito**
 
-1. **Ative** — Escolha **6) Modelo em nuvem gratuito** quando o instalador pedir uma IA, ou execute `haru-pc model free` se o Haru PC já estiver instalado. Sem cadastro, chave ou pagamento.
+1. **Ative** — Quando o instalador pedir uma IA, aperte Enter ou escolha **6) Modelo em nuvem gratuito**. Se o Haru PC já estiver instalado, execute `haru-pc model free`. Sem cadastro, chave ou pagamento.
 2. **Confira** — `haru-pc model` — se aparecer `opencode/space-bunny-free`, está pronto. Peça as tarefas pelo celular como sempre.
 3. **Quando o período gratuito acabar** — Se você usava outro modelo antes, o Haru PC volta para ele sozinho. Se não, escolha outra IA com `haru-pc model choose`.
 4. **Bom saber** — Suas mensagens passam pelos servidores do OpenCode (que afirma não armazená-las nem usá-las para treinamento). É gratuito por tempo limitado, sem data de término anunciada.

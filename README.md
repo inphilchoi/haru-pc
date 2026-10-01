@@ -141,7 +141,7 @@ haru-pc model free
 
 **Start with the free model**
 
-1. **Turn it on** — Pick **6) Free cloud model** when the installer asks for an AI, or run `haru-pc model free` if Haru PC is already installed. No sign-up, key or payment.
+1. **Turn it on** — When the installer asks for an AI, just press Enter or pick **6) Free cloud model**. If Haru PC is already installed, run `haru-pc model free`. No sign-up, key or payment.
 2. **Check it** — `haru-pc model` — when you see `opencode/space-bunny-free`, you're done. Ask from your phone as usual.
 3. **When the free period ends** — If you used another model before, Haru PC switches back to it on its own. If not, choose another AI with `haru-pc model choose`.
 4. **Good to know** — Your messages go through OpenCode's servers (OpenCode says it doesn't store them or use them for training). It's free for a limited time, with no end date announced.

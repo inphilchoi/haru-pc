@@ -83,7 +83,12 @@ Say ("Connection: " + (& node $relayScript status) + "  - change anytime: haru-p
 
 # 4. AI model
 $model = (& openclaw --profile $Profile_ config get agents.defaults.model.primary 2>$null) -replace '[\s"{}]', ''
-if (-not $model) { & (Join-Path $BinDir 'haru-pc.ps1') model choose }
+# Nothing chosen (Enter, or the sign-in failed) -> start with the free model, so Haru PC works right away.
+if (-not $model) {
+  try { & (Join-Path $BinDir 'haru-pc.ps1') model choose } catch {}
+  $model = (& openclaw --profile $Profile_ config get agents.defaults.model.primary 2>$null) -replace '[\s"{}]', ''
+  if (-not $model -or $model -match 'unset') { & (Join-Path $BinDir 'haru-pc.ps1') model free }
+}
 
 # 5. background start, audit, pairing
 Say "Starting Haru PC in the background…"

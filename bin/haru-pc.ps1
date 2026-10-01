@@ -23,15 +23,17 @@ switch ($cmd) {
     switch ($a1) {
       ''       { Oc config get agents.defaults.model }
       'choose' {
-        Write-Host "1) ChatGPT  2) Claude  3) GitHub Copilot  4) API key  5) Local model (free, 16 GB RAM+)  6) Free cloud model (OpenCode Zen, limited time)"
-        switch (Read-Host 'Choose 1-6') {
+        Write-Host "1) ChatGPT  2) Claude  3) GitHub Copilot  4) API key  5) Local model (free, 16 GB RAM+)  6) Free cloud model (OpenCode Zen, limited time) [Enter]"
+        $n = ''; try { $n = Read-Host 'Choose 1-6 [6]' } catch {}
+        if (-not $n) { $n = '6' }
+        switch ($n) {
           '1' { & $PSCommandPath model login chatgpt }
           '2' { & $PSCommandPath model login claude }
           '3' { & $PSCommandPath model login copilot }
           '4' { $p = Read-Host 'Provider (openai, anthropic, gemini, mistral, deepseek…)'; & $PSCommandPath model key $p }
           '5' { & $PSCommandPath model local }
           '6' { & $PSCommandPath model free }
-          default { Say 'Skipped. Run: haru-pc model choose' }
+          default { Say 'Not a choice - starting with the free model. Change any time: haru-pc model choose'; & $PSCommandPath model free }
         }
       }
       'login' {
@@ -58,8 +60,18 @@ switch ($cmd) {
         if ($prev -and $prev -ne $free -and $prev -notmatch 'unset') {
           Oc config set agents.defaults.model.fallbacks ('["' + $prev + '"]') --json | Out-Null
           Say "Free model on. When the free period ends, Haru PC goes back to: $prev"
-        } else { Say 'Free model on. It is free for a limited time - when it ends, choose another with: haru-pc model choose' }
+        } else { Say 'Free model on. It is free for a limited time - when it ends, choose another AI with: haru-pc model choose' }
         Say "Your messages to Haru PC go through OpenCode's servers (they say: not stored, not used for training)."
+      }
+      'check' {
+        $primary = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', ''
+        $fb = @(); try { $fb = @(((Oc config get agents.defaults.model.fallbacks 2>$null) -join '') | ConvertFrom-Json) } catch {}
+        Say "Main model: $primary   Backups: $($fb -join ', ')"
+        foreach ($m in @($primary) + $fb) {
+          if (-not $m) { continue }
+          $out = (Oc infer model run --local --model $m --prompt 'Reply with OK' 2>$null) -join ' '
+          if ($out -match 'ok') { Say "  OK  $m answers" } else { Say "  X   $m does not answer" }
+        }
       }
       'local' {
         Oc plugins install '@openclaw/llama-cpp-provider' --accept-capabilities | Out-Null
@@ -67,7 +79,7 @@ switch ($cmd) {
         Oc config set plugins.entries.haru-pc.config.readOnly true | Out-Null
         Say 'Small local models are easier to trick, so read-only mode is on. Turn it off with: haru-pc readonly off'
       }
-      default { Say 'Use: haru-pc model [choose|login|key|local|free]'; exit 2 }
+      default { Say 'Use: haru-pc model [choose|login|key|local|free|check]'; exit 2 }
     }
   }
   'allow' {
@@ -105,7 +117,7 @@ switch ($cmd) {
     Write-Host @'
 Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc pair | approve | unpair | status | logs
-  haru-pc model [choose | login chatgpt|claude|copilot | key <provider> | local | free]
+  haru-pc model [choose | login chatgpt|claude|copilot | key <provider> | local | free | check]
   haru-pc allow <folder> | readonly on|off | skills [enable|disable <name>]
   haru-pc relay on|off|status|url <wss://…> | remote on|off | update | uninstall
 '@

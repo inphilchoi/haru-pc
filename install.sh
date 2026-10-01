@@ -97,8 +97,11 @@ esac
 say "Connection: $(HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" status)  — change anytime: haru-pc relay on|off"
 
 # ---- 4. AI model -----------------------------------------------------------------------------
-if [ -z "$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n')" ]; then
-  "$BIN_DIR/haru-pc" model choose </dev/tty || say "You can choose a model later with: haru-pc model"
+# Nothing chosen (Enter, no terminal, or the sign-in failed) → start with the free model, so Haru PC works right away.
+model_now() { oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n'; }
+if [ -z "$(model_now)" ]; then
+  "$BIN_DIR/haru-pc" model choose </dev/tty 2>/dev/null || true
+  [ -n "$(model_now)" ] || "$BIN_DIR/haru-pc" model free || say "You can choose a model later with: haru-pc model choose"
 fi
 
 # ---- 5. background service, audit, pairing ---------------------------------------------------
