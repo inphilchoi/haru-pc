@@ -19,12 +19,26 @@ function Oc { & openclaw --profile $Profile_ @args; if ($LASTEXITCODE -ne 0) { t
 # 1. OpenClaw (pinned) via the official installer
 $have = (Get-Command openclaw -ErrorAction SilentlyContinue) -and ((& openclaw --version 2>$null) -match [regex]::Escape($OpenClawVersion))
 if (-not $have) {
-  Say "Installing OpenClaw $OpenClawVersion (and Node.js if needed)…"
-  $env:OPENCLAW_NO_PROMPT = '1'; $env:OPENCLAW_NO_ONBOARD = '1'; $env:OPENCLAW_VERSION = $OpenClawVersion
-  Invoke-Expression (Invoke-RestMethod 'https://openclaw.ai/install.ps1')
+  Say "Installing OpenClaw $OpenClawVersion (and Node.js if needed)..."
+  Say "If Node.js is older than 24.16, the installer upgrades it with winget - Windows may show an administrator (UAC) prompt. Choose Yes."
+  $env:OPENCLAW_NO_PROMPT = '1'
+  try {
+    # The official installer has a param() block, so it must run as a script block with arguments
+    # (Invoke-Expression runs param() as a plain statement and fails on NodeVersion validation).
+    $official = [scriptblock]::Create((Invoke-RestMethod 'https://openclaw.ai/install.ps1'))
+    & $official -Tag $OpenClawVersion -NoOnboard
+  } catch {
+    Write-Host ""
+    Write-Warning "OpenClaw install failed: $($_.Exception.Message)"
+    Write-Host "  1) Check your internet connection."
+    Write-Host "  2) Check Node.js: run  node --version  (needs 24.16 or newer, or 26.1 or newer)."
+    Write-Host "     If it is older, install the LTS from https://nodejs.org (or: winget install OpenJS.NodeJS.LTS), then open a NEW PowerShell window."
+    Write-Host "  3) Run the Haru PC installer again."
+    Write-Host "  More: $Repo#troubleshooting"
+  }
   $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
 }
-if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) { throw "OpenClaw didn't install. See $Repo#troubleshooting" }
+if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) { throw "OpenClaw did not install. Fix the problem above (usually Node.js 24.16+), then run the installer again. See $Repo#troubleshooting" }
 
 # 2. Haru PC files
 Say "Installing Haru PC to $HaruHome…"

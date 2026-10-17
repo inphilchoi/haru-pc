@@ -87,6 +87,8 @@ Das Installationsprogramm:
 4. registriert Haru PC für den Start im Hintergrund (launchd unter macOS, eine geplante Aufgabe unter Windows, ein `systemd --user`-Dienst unter Linux),
 5. hilft Ihnen bei der Wahl eines KI-Modells und zeigt anschließend einen QR-Code zum Koppeln an.
 
+Unter Windows aktualisiert der Installer Node.js per winget auf die aktuelle LTS-Version, falls es älter als 24.16 ist. Dabei kann ein Bestätigungsfenster für Administratorrechte (UAC) erscheinen. Wählen Sie **Ja**.
+
 Möchten Sie das Skript zuerst lesen? Laden Sie [`install.sh`](install.sh) oder [`install.ps1`](install.ps1) herunter, prüfen Sie die Dateien und führen Sie sie dann aus. Mehr dazu: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ Ihre Einstellungen bleiben in `~/.haru-pc`, bis Sie diesen Ordner löschen.
 | QR-Code zum Koppeln abgelaufen | Führen Sie `haru-pc pair` erneut aus |
 | Aufgaben dauern lange | Ein lokales Modell auf einem leistungsschwachen Rechner ist langsam. Melden Sie sich mit `haru-pc model login chatgpt` oder `haru-pc model login claude` bei einem Abonnement an |
 | Es ist keine Freigabekarte erschienen | Nachdem Sie eine Aufgabe übergeben haben, können Sie die Haru-App schließen: Haru PC arbeitet bis zu 15 Minuten weiter, und wartende Freigabekarten erscheinen, sobald Sie Haru wieder öffnen. Wird eine Anfrage nicht innerhalb von 10 Minuten beantwortet, lehnt Haru PC sie ab und es wird nichts ausgeführt. Öffnen Sie Haru und stellen Sie die Anfrage erneut |
+| Fehler „NodeVersion“ ungültig / OpenClaw-Installation fehlgeschlagen | Führen Sie den Windows-Befehl oben erneut aus, damit der aktuelle Installer verwendet wird. Bricht er weiter ab, prüfen Sie `node --version`: nötig ist 24.16 oder neuer (oder 26.1 oder neuer). Installieren Sie die Node.js-LTS von nodejs.org, öffnen Sie ein neues PowerShell-Fenster und starten Sie den Installer erneut |
+| Unter Windows erscheint ein Administrator-Bestätigungsfenster | Normal, wenn der Installer Node.js aktualisiert. Wählen Sie **Ja** |
 | Etwas ist schiefgelaufen | Führen Sie `haru-pc logs` aus und hängen Sie die Ausgabe an ein Issue an |
 
 ---

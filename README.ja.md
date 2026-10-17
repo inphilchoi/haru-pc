@@ -87,6 +87,8 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 4. Haru PC がバックグラウンドで起動するよう登録します（macOS では launchd、Windows ではタスクスケジューラのタスク、Linux では `systemd --user` サービス）。
 5. AI モデルの選択を手伝ったあと、ペアリング用の QR コードを表示します。
 
+Windows で Node.js のバージョンが 24.16 より古い場合、インストーラーが winget で最新の LTS に更新します。このとき管理者の確認 (UAC) 画面が表示されることがあるので、「はい」を選んでください。
+
 先にスクリプトの中身を確認したい場合は、[`install.sh`](install.sh) または [`install.ps1`](install.ps1) をダウンロードして確認してから実行してください。詳しい案内: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ haru-pc uninstall    # バックグラウンドサービスを停止し、Haru P
 | ペアリング用 QR コードの期限が切れた | もう一度 `haru-pc pair` を実行してください |
 | タスクの処理が遅い | 性能の低いマシンではローカルモデルの動作が遅くなります。`haru-pc model login chatgpt` または `haru-pc model login claude` でサブスクリプションにサインインしてください |
 | 承認カードが届かない | 仕事を頼んだあとは Haru アプリを閉じてもかまいません。Haru PC は最大 15 分間作業を続け、Haru を開き直すと待っている承認カードが表示されます。10 分以内に応答がないと Haru PC はリクエストを取り下げ、何も実行しません。Haru を開いて、もう一度頼んでください |
+| `NodeVersion` 変数が無効というエラー / OpenClaw のインストール失敗 | 上の Windows 用コマンドをもう一度実行し、最新のインストーラーを使ってください。それでも止まる場合は `node --version` を確認してください(24.16 以上、または 26.1 以上が必要です)。nodejs.org から Node.js LTS をインストールし、PowerShell を開き直してからもう一度実行してください |
+| Windows で管理者の確認画面が出る | インストーラーが Node.js を更新するときの正常な動作です。「はい」を選んでください |
 | 何かがうまくいかない | `haru-pc logs` を実行し、その出力を Issue に添付してください |
 
 ---

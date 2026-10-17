@@ -87,6 +87,8 @@ Le programme d'installation :
 4. configure Haru PC pour qu'il démarre en arrière-plan (launchd sous macOS, tâche planifiée sous Windows, service `systemd --user` sous Linux),
 5. vous aide à choisir un modèle d'IA, puis affiche un QR code d'appairage.
 
+Sous Windows, si Node.js est antérieur à la version 24.16, l'installateur le met à jour vers la LTS actuelle avec winget, et Windows peut afficher une fenêtre de confirmation administrateur (UAC). Choisissez **Oui**.
+
 Vous préférez lire le script avant de l'exécuter ? Téléchargez [`install.sh`](install.sh) ou [`install.ps1`](install.ps1), vérifiez-les, puis lancez-les. En savoir plus : [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ Vos réglages restent dans `~/.haru-pc` tant que vous ne supprimez pas ce dossie
 | Le QR code d'appairage a expiré | Exécutez de nouveau `haru-pc pair` |
 | Les tâches sont lentes | Un modèle local sur une machine modeste est lent. Connectez-vous à un abonnement avec `haru-pc model login chatgpt` ou `haru-pc model login claude` |
 | Aucune carte d'approbation n'est apparue | Vous pouvez fermer Haru après avoir confié une tâche : Haru PC continue jusqu'à 15 minutes, et les cartes d'approbation en attente s'affichent quand vous rouvrez Haru. Si une demande reste sans réponse pendant 10 minutes, Haru PC la refuse et rien ne s'exécute. Ouvrez Haru et redemandez |
+| Erreur indiquant que la variable `NodeVersion` est non valide / échec de l'installation d'OpenClaw | Relancez la commande Windows ci-dessus pour utiliser le dernier installateur. S'il s'arrête encore, vérifiez `node --version` : il faut la version 24.16 ou ultérieure (ou 26.1 ou ultérieure). Installez Node.js LTS depuis nodejs.org, ouvrez une nouvelle fenêtre PowerShell, puis relancez l'installateur |
+| Une fenêtre de confirmation administrateur apparaît sous Windows | C'est normal quand l'installateur met à jour Node.js. Choisissez **Oui** |
 | Quelque chose s'est mal passé | Exécutez `haru-pc logs` et joignez la sortie à une issue |
 
 ---

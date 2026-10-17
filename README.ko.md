@@ -87,6 +87,8 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 4. 하루 PC가 백그라운드에서 자동으로 시작되도록 등록해요(macOS는 launchd, Windows는 예약된 작업, Linux는 `systemd --user` 서비스).
 5. AI 모델 선택을 도와준 뒤, 페어링용 QR 코드를 보여 줘요.
 
+Windows에서 Node.js 버전이 24.16보다 낮으면 설치기가 winget으로 최신 LTS로 올려요. 이때 관리자 확인(UAC) 창이 뜰 수 있으니 **예**를 눌러 주세요.
+
 스크립트를 먼저 읽어 보고 싶다면 [`install.sh`](install.sh) 또는 [`install.ps1`](install.ps1)을 내려받아 확인한 뒤 실행하세요. 더 자세한 안내: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ haru-pc uninstall    # 백그라운드 서비스를 멈추고 하루 PC 제거
 | 페어링 QR 코드가 만료됐어요 | `haru-pc pair`를 다시 실행하세요 |
 | 작업이 느려요 | 사양이 낮은 컴퓨터에서는 로컬 모델이 느려요. `haru-pc model login chatgpt` 또는 `haru-pc model login claude`로 구독에 로그인해 보세요 |
 | 승인 카드가 오지 않아요 | 일을 맡긴 뒤에는 하루 앱을 닫아도 돼요. 하루 PC가 15분까지 일을 이어 가고, 하루를 다시 열면 기다리던 승인 카드가 떠요. 10분 안에 응답하지 않으면 하루 PC가 요청을 거절하고 아무것도 실행하지 않아요. 하루를 열고 다시 부탁해 보세요 |
+| `NodeVersion` 변수가 잘못되었다는 오류 / OpenClaw 설치 실패 | 위의 Windows 명령을 다시 실행해 최신 설치기로 설치하세요. 그래도 멈추면 `node --version`을 확인하세요(24.16 이상 또는 26.1 이상이어야 해요). nodejs.org에서 Node.js LTS를 설치하고, PowerShell 창을 새로 연 뒤 설치기를 다시 실행하세요 |
+| Windows에서 관리자 확인 창이 떠요 | 설치기가 Node.js를 올릴 때 나오는 정상 창이에요. **예**를 누르세요 |
 | 뭔가 잘못됐어요 | `haru-pc logs`를 실행하고 출력 내용을 이슈에 첨부해 주세요 |
 
 ---

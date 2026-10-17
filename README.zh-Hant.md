@@ -87,6 +87,8 @@ irm https://raw.githubusercontent.com/inphilchoi/haru-pc/main/install.ps1 | iex
 4. 將 Haru PC 註冊為在背景自動啟動（macOS 使用 launchd，Windows 使用排程工作，Linux 使用 `systemd --user` 服務）；
 5. 協助你選擇 AI 模型，然後顯示配對用的 QR 碼。
 
+在 Windows 上，如果 Node.js 版本低於 24.16，安裝程式會透過 winget 升級到最新的 LTS 版本，此時可能會跳出系統管理員確認（UAC）視窗，請按「是」。
+
 想先看過指令碼內容？可以下載 [`install.sh`](install.sh) 或 [`install.ps1`](install.ps1)，確認後再執行。更多說明：[inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ haru-pc uninstall    # 停止背景服務並移除 Haru PC
 | 配對 QR 碼已過期 | 重新執行 `haru-pc pair` |
 | 工作執行得很慢 | 在效能較低的電腦上，本機模型會比較慢。可以用 `haru-pc model login chatgpt` 或 `haru-pc model login claude` 登入訂閱方案 |
 | 一直沒收到核准卡片 | 交代工作後可以關閉 Haru App：Haru PC 會繼續處理最多 15 分鐘，重新開啟 Haru 時，等待中的核准卡片就會出現。如果請求在 10 分鐘內沒有得到回應，Haru PC 會自動拒絕，不會執行任何動作。請開啟 Haru 再說一次 |
+| 出現 `NodeVersion` 變數無效的錯誤 / OpenClaw 安裝失敗 | 請重新執行上方的 Windows 指令，使用最新的安裝程式。若仍然中斷，請檢查 `node --version`（需要 24.16 以上，或 26.1 以上）。從 nodejs.org 安裝 Node.js LTS，重新開啟 PowerShell 視窗後再執行安裝程式 |
+| Windows 上跳出系統管理員確認視窗 | 安裝程式升級 Node.js 時的正常視窗，請按「是」 |
 | 發生其他問題 | 執行 `haru-pc logs`，並將輸出內容附加到 Issue 中 |
 
 ---

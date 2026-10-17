@@ -87,6 +87,8 @@ El instalador:
 4. registra Haru PC para que se inicie en segundo plano (launchd en macOS, una tarea programada en Windows, un servicio `systemd --user` en Linux),
 5. le ayuda a elegir un modelo de IA y, a continuación, muestra un código QR de vinculación.
 
+En Windows, si Node.js es anterior a la versión 24.16, el instalador lo actualiza a la LTS actual con winget y Windows puede mostrar una ventana de confirmación de administrador (UAC). Elija **Sí**.
+
 ¿Prefiere leer el script antes? Descargue [`install.sh`](install.sh) o [`install.ps1`](install.ps1), revíselos y luego ejecútelos. Más información: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ Su configuración se conserva en `~/.haru-pc` hasta que elimine esa carpeta.
 | El código QR de vinculación caducó | Vuelva a ejecutar `haru-pc pair` |
 | Las tareas van lentas | Un modelo local en un equipo modesto es lento. Inicie sesión con una suscripción mediante `haru-pc model login chatgpt` o `haru-pc model login claude` |
 | Nunca apareció la tarjeta de aprobación | Puede cerrar Haru después de encargar una tarea: Haru PC sigue trabajando hasta 15 minutos y las tarjetas de aprobación pendientes aparecen al volver a abrir Haru. Si una solicitud no se responde en 10 minutos, Haru PC la rechaza y no se ejecuta nada. Abra Haru y vuelva a pedirlo |
+| Error de que la variable `NodeVersion` no es válida / falla la instalación de OpenClaw | Vuelva a ejecutar el comando de Windows de arriba para usar el instalador más reciente. Si sigue deteniéndose, revise `node --version`: debe ser 24.16 o posterior (o 26.1 o posterior). Instale Node.js LTS desde nodejs.org, abra una ventana nueva de PowerShell y ejecute el instalador otra vez |
+| En Windows aparece una ventana de confirmación de administrador | Es normal cuando el instalador actualiza Node.js. Elija **Sí** |
 | Algo salió mal | Ejecute `haru-pc logs` y adjunte el resultado a un issue |
 
 ---

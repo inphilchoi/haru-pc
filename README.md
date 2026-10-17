@@ -87,6 +87,8 @@ The installer:
 4. registers Haru PC to start in the background (launchd on macOS, a scheduled task on Windows, a `systemd --user` service on Linux),
 5. helps you choose an AI model, then shows a pairing QR code.
 
+On Windows, if Node.js is older than 24.16, the installer upgrades it to the current LTS with winget, and Windows may show an administrator (UAC) confirmation window. Choose **Yes**.
+
 Prefer to read the script first? Download [`install.sh`](install.sh) or [`install.ps1`](install.ps1), check them, then run them. More: [inphilchoi.github.io/haru](https://inphilchoi.github.io/haru/)
 
 ---
@@ -224,6 +226,8 @@ Your settings stay in `~/.haru-pc` until you delete that folder.
 | Pairing QR expired | Run `haru-pc pair` again |
 | Tasks are slow | A local model on a small machine is slow. Sign in to a subscription with `haru-pc model login chatgpt` or `haru-pc model login claude` |
 | An approval card never appeared | You can close Haru after handing off a task: Haru PC keeps working for up to 15 minutes, and waiting approval cards appear when you open Haru again. If a request isn't answered within 10 minutes, Haru PC declines it and nothing runs. Open Haru and ask again |
+| `Cannot add attribute … NodeVersion` / OpenClaw installation failed | Update to the latest Haru PC installer (run the Windows command above again). If it still stops, check `node --version`: it must be 24.16 or newer (or 26.1 or newer). Install the Node.js LTS from nodejs.org, open a new PowerShell window, and run the installer again |
+| An administrator confirmation window appears on Windows | Expected when the installer upgrades Node.js. Choose **Yes** |
 | Something went wrong | Run `haru-pc logs` and attach the output to an issue |
 
 ---
