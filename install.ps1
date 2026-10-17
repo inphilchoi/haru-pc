@@ -5,6 +5,8 @@
 # model choice, background start (scheduled task), security audit, pairing QR.
 # Nothing is sent to CreativeLab. Sign-ins and keys are entered by you on the provider's own page.
 # Runs inside the user's own session (irm | iex): remember their setting and put it back at the end.
+# Restricted PCs refuse to run scripts (irm | iex then fails): allow them for this window only, nothing is changed permanently.
+try { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force } catch {}
 $OldEap = $ErrorActionPreference
 $ErrorActionPreference = 'Stop'
 
@@ -122,7 +124,7 @@ if (-not ($sslDirs | Where-Object { Test-Path (Join-Path $_ 'openssl.exe') })) {
   $sslOk = $false
   try {
     $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    & winget install --id ShiningLight.OpenSSL.Light -e --silent --accept-package-agreements --accept-source-agreements
+    & winget install --id ShiningLight.OpenSSL.Light -e --source winget --silent --accept-package-agreements --accept-source-agreements
     $ErrorActionPreference = $eap
     $sslOk = [bool]($sslDirs | Where-Object { Test-Path (Join-Path $_ 'openssl.exe') })
   } catch { $ErrorActionPreference = $eap }

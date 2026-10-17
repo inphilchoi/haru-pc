@@ -99,6 +99,25 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
       'key' {
         if (-not $a2) { Say 'Use: haru-pc model key <provider>'; exit 2 }
         $choice = switch ($a2) { { $_ -in 'chatgpt','openai' } { 'openai-api-key' } { $_ -in 'claude','anthropic' } { 'apiKey' } { $_ -in 'gemini','google' } { 'gemini-api-key' } { $_ -in 'grok','xai' } { 'xai-api-key' } { $_ -in 'meta','llama' } { 'meta-api-key' } default { "$a2-api-key" } }
+        if ($a2 -in 'gemini','google') {
+          # No wizard: `openclaw models auth paste-api-key` reads the key from stdin (never on the command line),
+          # then `models set` picks a model that works with a free key (gemini-3.1-pro-preview has quota 0 there).
+          $gm = if ($env:HARU_PC_GEMINI_MODEL) { $env:HARU_PC_GEMINI_MODEL } else { 'google/gemini-3.8-flash' }
+          Say 'Get a free key at https://aistudio.google.com/apikey, paste it here (it stays hidden), then press Enter.'
+          $sec = Read-Host 'Gemini API key' -AsSecureString
+          $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+          try { $plain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
+          if (-not $plain) { Say 'No key entered.'; exit 1 }
+          $ok = $false
+          $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'   # PS 5.1: native stderr must not abort
+          try {
+            $plain | & openclaw --profile $Profile_ models auth paste-api-key --provider google 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) { & openclaw --profile $Profile_ models set $gm 2>&1 | Out-Null; $ok = ($LASTEXITCODE -eq 0) }
+          } catch {} finally { $ErrorActionPreference = $eap; $plain = $null }
+          $now = ''; try { $now = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
+          if ($ok -and $now -and $now -notmatch 'unset') { Say "Now using: $now"; exit 0 }
+          Say "Key setup didn't finish. Check the key and try again: haru-pc model key gemini"; exit 1
+        }
         Say "Paste your $a2 API key when asked. It's stored in this computer's secure storage."
         $prev = ''; try { $prev = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
         if ($prev -match 'unset') { $prev = '' }

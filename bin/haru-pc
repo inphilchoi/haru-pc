@@ -154,6 +154,18 @@ case "$cmd" in
           meta|llama) choice=meta-api-key ;;
           *) choice="${p}-api-key" ;;
         esac
+        case "$p" in gemini|google)
+          # No wizard: `openclaw models auth paste-api-key` reads the key from stdin (never on the command line),
+          # then `models set` picks a model that works with a free key (gemini-3.1-pro-preview has quota 0 there).
+          gm="${HARU_PC_GEMINI_MODEL:-google/gemini-3.8-flash}"
+          say "Get a free key at https://aistudio.google.com/apikey, paste it here (it stays hidden), then press Enter."
+          printf 'Gemini API key: ' >&2; IFS= read -rs gkey || true; printf '\n' >&2
+          [ -n "$gkey" ] || { say "No key entered."; exit 1; }
+          if printf '%s\n' "$gkey" | oc models auth paste-api-key --provider google >/dev/null 2>&1 && oc models set "$gm" >/dev/null 2>&1; then
+            gkey=""; say "Now using: $(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n')"; exit 0
+          fi
+          gkey=""; say "Key setup didn't finish. Check the key and try again: haru-pc model key gemini"; exit 1 ;;
+        esac
         say "Paste your $p API key when asked. It's stored in this computer's secure storage."
         # Some providers keep the current main model on setup (xAI did, 10/1) — clear it so the new key is used,
         # and put the old one back if setup doesn't finish.

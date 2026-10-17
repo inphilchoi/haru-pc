@@ -224,6 +224,10 @@ Your settings stay in `~/.haru-pc` until you delete that folder.
 | An administrator confirmation window appears on Windows | Expected when the installer upgrades Node.js, and again when it installs OpenSSL. Choose **Yes** |
 | Windows: the gateway keeps restarting / `openssl not found in trusted system directories` | The encrypted connection needs OpenSSL. The installer installs it with `winget` (a UAC prompt appears: choose **Yes**). If that failed, install "Win64 OpenSSL Light" from [slproweb.com](https://slproweb.com/products/Win32OpenSSL.html) into its default folder and run the installer again |
 | The model answers `403` / `FreeTierError: OpenCode's free tier can only be used from within OpenCode` | The old free cloud model has ended. Switch with `haru-pc model key gemini` (free key) or `haru-pc model local` (Ollama) |
+| The QR is cut off or too big / can't scan | `haru-pc pair` now opens the QR in a small picture window (on the taskbar if hidden). No desktop? It prints in the console instead; `haru-pc pair --terminal` forces that. The picture file is deleted after 10 minutes |
+| Windows: "running scripts is disabled" / execution policy | The installer now allows scripts for its own window only. If you still see it, run `Set-ExecutionPolicy -Scope Process Bypass -Force` in that PowerShell window, then the install command again |
+| Windows: OpenSSL install fails (`0x8a15005e`, "found in multiple sources") | Run `winget install --id ShiningLight.OpenSSL.Light -e --source winget`, then the installer again |
+| Gemini: a long setup wizard opens, or `429` / quota 0 | `haru-pc model key gemini` now only asks for the key (no wizard) and uses `google/gemini-3.8-flash`, which works with free keys. The `gemini-3.1-pro` models need a paid key. Change later with `openclaw --profile haru models set <model>` |
 | I need a new pairing QR | Run `haru-pc pair`. Each code is valid for 10 minutes and works once |
 | Is Haru PC running? | Run `openclaw --profile haru gateway status` (or `haru-pc status`). It should say the gateway is running and listening |
 | Something went wrong | Run `haru-pc logs` and attach the output to an issue |
