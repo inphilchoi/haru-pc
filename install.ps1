@@ -112,7 +112,16 @@ if (-not $model) {
 # 5. background start, audit, pairing
 Say "Starting Haru PC in the background…"
 try { Oc gateway install | Out-Null } catch { Oc onboard --non-interactive --accept-risk --install-daemon --skip-health --workspace (Join-Path $HaruHome 'workspace') | Out-Null }
-try { Oc gateway restart | Out-Null } catch {}
+# `gateway install` registers the scheduled task but may leave it stopped ("Ready"), and then
+# `gateway restart` waits minutes for a gateway that never comes up - start the task directly.
+$gwTask = Get-ScheduledTask -TaskName "OpenClaw Gateway ($Profile_)" -ErrorAction SilentlyContinue
+if ($gwTask -and $gwTask.State -ne 'Running') { Start-ScheduledTask -TaskName $gwTask.TaskName }
+else {
+  # Already running (reinstall): restart so the new plugin loads, but never wait more than 90 s.
+  $job = Start-Job { & openclaw --profile $using:Profile_ gateway restart 2>&1 | Out-Null }
+  if (-not (Wait-Job $job -Timeout 90)) { Stop-Job $job; Write-Warning "Gateway restart is slow - it keeps starting in the background." }
+  Remove-Job $job -Force
+}
 & openclaw --profile $Profile_ security audit
 Say 'Done. Open the Haru app on your phone, say "내 PC 연결해 줘" (Connect my PC), and scan this code:'
 & (Join-Path $BinDir 'haru-pc.ps1') pair
