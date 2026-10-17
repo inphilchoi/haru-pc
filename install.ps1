@@ -15,9 +15,14 @@ $BinDir  = Join-Path $HaruHome 'bin'
 
 function Say($m)  { Write-Host "하루 PC " -ForegroundColor Magenta -NoNewline; Write-Host $m }
 function Oc { & openclaw --profile $Profile_ @args; if ($LASTEXITCODE -ne 0) { throw "openclaw $args failed" } }
+# Read-only openclaw calls that may legitimately fail (unset config key, not installed yet).
+# Windows PowerShell 5.1 turns a native command's stderr into a terminating error when
+# $ErrorActionPreference is 'Stop', even with 2>$null - so relax it just for these calls.
+function OcRead { $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  try { (& openclaw @args 2>$null) -join "`n" } catch { '' } finally { $ErrorActionPreference = $eap } }
 
 # 1. OpenClaw (pinned) via the official installer
-$have = (Get-Command openclaw -ErrorAction SilentlyContinue) -and ((& openclaw --version 2>$null) -match [regex]::Escape($OpenClawVersion))
+$have = (Get-Command openclaw -ErrorAction SilentlyContinue) -and ((OcRead --version) -match [regex]::Escape($OpenClawVersion))
 if (-not $have) {
   Say "Installing OpenClaw $OpenClawVersion (and Node.js if needed)..."
   Say "If Node.js is older than 24.16, the installer upgrades it with winget - Windows may show an administrator (UAC) prompt. Choose Yes."
@@ -77,7 +82,7 @@ finally { Pop-Location }
 Oc plugins install --force --accept-capabilities (Join-Path $app 'plugin') | Out-Null   # reviewed source, published in this repo
 # Commands are approved by the Haru PC plugin (one card on the phone, works with Claude logins too).
 # Only switch OpenClaw's own asking off once the plugin is really installed.
-if ((& openclaw --profile $Profile_ plugins list 2>$null) -match 'haru-pc') { Oc config set tools.exec.mode full | Out-Null }
+if ((OcRead --profile $Profile_ plugins list) -match 'haru-pc') { Oc config set tools.exec.mode full | Out-Null }
 else { Oc config set tools.exec.mode ask | Out-Null; Write-Warning "Haru PC safety plugin is not active - commands use OpenClaw's own approval. Run the installer again to fix." }
 
 # 3b. How the phone reaches this computer: Haru relay (default) or direct/self-hosted
@@ -96,11 +101,11 @@ if ($connection -eq 'direct') { & node $relayScript off | Out-Null } else { & no
 Say ("Connection: " + (& node $relayScript status) + "  - change anytime: haru-pc relay on|off")
 
 # 4. AI model
-$model = (& openclaw --profile $Profile_ config get agents.defaults.model.primary 2>$null) -replace '[\s"{}]', ''
+$model = (OcRead --profile $Profile_ config get agents.defaults.model.primary) -replace '[\s"{}]', ''
 # Nothing chosen (Enter, or the sign-in failed) -> start with the free model, so Haru PC works right away.
 if (-not $model) {
   try { & (Join-Path $BinDir 'haru-pc.ps1') model choose } catch {}
-  $model = (& openclaw --profile $Profile_ config get agents.defaults.model.primary 2>$null) -replace '[\s"{}]', ''
+  $model = (OcRead --profile $Profile_ config get agents.defaults.model.primary) -replace '[\s"{}]', ''
   if (-not $model -or $model -match 'unset') { & (Join-Path $BinDir 'haru-pc.ps1') model free }
 }
 

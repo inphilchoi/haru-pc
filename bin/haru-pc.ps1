@@ -6,6 +6,9 @@ $HaruHome = if ($env:HARU_PC_HOME) { $env:HARU_PC_HOME } else { Join-Path $HOME 
 $Profile_ = if ($env:HARU_PC_PROFILE) { $env:HARU_PC_PROFILE } else { 'haru' }
 $Ws = Join-Path $HaruHome 'workspace'
 function Oc { & openclaw --profile $Profile_ @args }
+# Windows PowerShell 5.1: native stderr + 'Stop' = terminating error, even with 2>$null (e.g. an unset config key).
+function OcRead { $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  try { (& openclaw --profile $Profile_ @args 2>$null) -join "`n" } catch { '' } finally { $ErrorActionPreference = $eap } }
 function Say($m) { Write-Host "하루 PC " -ForegroundColor Magenta -NoNewline; Write-Host $m }
 
 $cmd = if ($Args_.Count -gt 0) { $Args_[0] } else { 'help' }
@@ -61,11 +64,11 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
       }
       'login' {
         # A sign-in keeps an existing main model, so clear it first (and put it back if the sign-in fails).
-        $prev = ''; try { $prev = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        $prev = ''; try { $prev = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
         if ($prev -match 'unset') { $prev = '' }
         function Clear-Main { try { Oc config unset agents.defaults.model.primary | Out-Null } catch {} }
         function Check-Main {
-          $now = ''; try { $now = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+          $now = ''; try { $now = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
           if ($now -and $now -notmatch 'unset') { Say "Now using: $now" }
           else { if ($prev) { Oc config set agents.defaults.model.primary $prev | Out-Null }; Say "Sign-in didn't finish. Still using: $prev"; exit 1 }
         }
@@ -92,18 +95,18 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
         if (-not $a2) { Say 'Use: haru-pc model key <provider>'; exit 2 }
         $choice = switch ($a2) { { $_ -in 'chatgpt','openai' } { 'openai-api-key' } { $_ -in 'claude','anthropic' } { 'apiKey' } { $_ -in 'gemini','google' } { 'gemini-api-key' } { $_ -in 'grok','xai' } { 'xai-api-key' } { $_ -in 'meta','llama' } { 'meta-api-key' } default { "$a2-api-key" } }
         Say "Paste your $a2 API key when asked. It's stored in this computer's secure storage."
-        $prev = ''; try { $prev = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        $prev = ''; try { $prev = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
         if ($prev -match 'unset') { $prev = '' }
         try { Oc config unset agents.defaults.model.primary | Out-Null } catch {}
         try { Oc onboard --auth-choice $choice --skip-health --no-install-daemon --workspace $Ws } catch {}
-        $now = ''; try { $now = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        $now = ''; try { $now = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
         if ($now -and $now -notmatch 'unset') { Say "Now using: $now" } else { if ($prev) { Oc config set agents.defaults.model.primary $prev | Out-Null }; Say "Key setup didn't finish. Still using: $prev"; exit 1 }
       }
       'free' {
         # Same as bin/haru-pc: no account needed ("public" key); the current model becomes the backup.
         $free = 'opencode/space-bunny-free'
         $prev = ''
-        try { $prev = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', '' } catch {}
+        try { $prev = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
         Oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice opencode-zen --opencode-zen-api-key public --workspace $Ws | Out-Null
         Oc config set agents.defaults.model.primary $free | Out-Null
         if ($prev -and $prev -ne $free -and $prev -notmatch 'unset') {
@@ -113,12 +116,12 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
         Say "Your messages to Haru PC go through OpenCode's servers (they say: not stored, not used for training)."
       }
       'check' {
-        $primary = ((Oc config get agents.defaults.model.primary 2>$null) -join '') -replace '[\s"{}]', ''
-        $fb = @(); try { $fb = @(((Oc config get agents.defaults.model.fallbacks 2>$null) -join '') | ConvertFrom-Json) } catch {}
+        $primary = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', ''
+        $fb = @(); try { $fb = @(((OcRead config get agents.defaults.model.fallbacks) -join '') | ConvertFrom-Json) } catch {}
         Say "Main model: $primary   Backups: $($fb -join ', ')"
         foreach ($m in @($primary) + $fb) {
           if (-not $m) { continue }
-          $out = (Oc infer model run --local --model $m --prompt 'Reply with OK' 2>$null) -join ' '
+          $out = (OcRead infer model run --local --model $m --prompt 'Reply with OK') -replace "`n", ' '
           if ($out -match 'ok') { Say "  OK  $m answers" } else { Say "  X   $m does not answer" }
         }
       }
@@ -135,7 +138,7 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
     if (-not (Test-Path $a1 -PathType Container)) { Say "Folder not found: $a1"; exit 2 }
     $f = (Resolve-Path $a1).Path
     $cur = @()
-    try { $cur = (& openclaw --profile $Profile_ config get plugins.entries.haru-pc.config.allowedFolders 2>$null | ConvertFrom-Json) } catch {}
+    try { $cur = (OcRead config get plugins.entries.haru-pc.config.allowedFolders | ConvertFrom-Json) } catch {}
     if (-not $cur -or $cur.Count -eq 0) { $cur = @('Documents', 'Downloads', 'Desktop' | ForEach-Object { Join-Path $HOME $_ }) + $Ws }
     if ($cur -notcontains $f) { $cur += $f }
     Oc config set plugins.entries.haru-pc.config.allowedFolders ($cur | ConvertTo-Json -Compress) --json | Out-Null
