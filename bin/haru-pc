@@ -26,9 +26,7 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc model login grok     sign in with SuperGrok / X Premium (xAI's own page)
   haru-pc model login copilot  sign in with GitHub Copilot
   haru-pc model key <provider> use an API key: chatgpt, claude, gemini, grok, meta, mistral, deepseek…
-  haru-pc model local          free local model on this computer
-  haru-pc model free           free cloud model (OpenCode Zen "Space Bunny", limited time) — your
-                               current model stays as the backup when the free period ends
+  haru-pc model local          free, private local model on this computer (Ollama if installed, else llama.cpp)
   haru-pc model check          is the current model answering? which backups are ready?
 
   haru-pc allow <folder>       let Haru PC work in another folder
@@ -64,17 +62,16 @@ model_choose() {
 Which AI should Haru PC use?
   1) ChatGPT (OpenAI)      — sign in with your plan, or an API key
   2) Claude (Anthropic)    — API key (plan sign-in isn't allowed by Anthropic's terms)
-  3) Gemini (Google)       — API key (free key at aistudio.google.com/apikey)
+  3) Gemini (Google)       — free API key from aistudio.google.com/apikey  (Enter)
   4) Grok (xAI)            — sign in with SuperGrok / X Premium, or an API key
   5) Meta (Llama / Muse)   — API key
-  6) Free cloud model      — OpenCode Zen "Space Bunny", no sign-up, limited time  (Enter)
+  6) Local model with Ollama — free, private, needs a good GPU / 16 GB+ RAM
   7) GitHub Copilot        — sign in
   8) Other API key         — Mistral, DeepSeek, OpenRouter…
-  9) Local model           — free, private, slower (16 GB RAM or more recommended)
 Sign-ins happen on each company's own page. Haru PC never asks for your password.
 EOF
-  read -r -p "Choose 1-9 [6]: " n || n=6
-  n="${n:-6}"
+  read -r -p "Choose 1-8 [3]: " n || n=3
+  n="${n:-3}"
   how() {  # $1 = provider; asks sign-in (1) or API key (2)
     local h; read -r -p "  1) Sign in with your account   2) API key   [1]: " h || h=1
     if [ "${h:-1}" = 2 ]; then "$0" model key "$1"; else "$0" model login "$1"; fi
@@ -87,11 +84,10 @@ EOF
     3) "$0" model key gemini ;;
     4) how grok ;;
     5) "$0" model key meta ;;
-    6) "$0" model free ;;
+    6) "$0" model local ;;
     7) "$0" model login copilot ;;
     8) read -r -p "Provider (mistral, deepseek, openrouter, …): " p; "$0" model key "$p" ;;
-    9) "$0" model local ;;
-    *) say "Not a choice — starting with the free model. Change any time: haru-pc model choose"; "$0" model free ;;
+    *) say "Not a choice — using Gemini's free key. Change any time: haru-pc model choose"; "$0" model key gemini ;;
   esac
 }
 
@@ -168,23 +164,10 @@ case "$cmd" in
         if [ -n "$now" ]; then say "Now using: $now"
         else [ -n "$prev" ] && oc config set agents.defaults.model.primary "$prev" >/dev/null; say "Key setup didn't finish. Still using: ${prev:-no model}"; exit 1; fi ;;
       free)
-        # OpenCode Zen's free models need no account: the key "public" is what opencode itself sends.
-        # The free period has no announced end, so the model you had before becomes the backup —
-        # when Zen stops answering (401), OpenClaw moves on to it (checked 2026-10-01).
-        free="opencode/space-bunny-free"
-        prev="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
-        oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon \
-          --auth-choice opencode-zen --opencode-zen-api-key public --workspace "$HARU_HOME/workspace" >/dev/null
-        oc config set agents.defaults.model.primary "$free" >/dev/null
-        [ "$prev" = "$free" ] && prev=""
-        set_fallbacks "$prev"
-        backups="$(fallback_list)"
-        if [ -n "$backups" ]; then
-          say "Free model on. If it stops answering, Haru PC uses: $backups"
-        else
-          say "Free model on. It's free for a limited time — when it ends, choose another AI with: haru-pc model choose"
-        fi
-        say "Your messages to Haru PC go through OpenCode's servers (they say: not stored, not used for training)." ;;
+        # OpenCode Zen's free tier ended (403 FreeTierError: "can only be used from within OpenCode", checked 2026-10-17).
+        say "The free cloud model (OpenCode Zen) ended in October 2026."
+        say "Free alternatives: a Gemini key (https://aistudio.google.com/apikey) -> haru-pc model key gemini"
+        say "                   or a model on this computer              -> haru-pc model local"; exit 2 ;;
       check)
         primary="$(oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n' || true)"
         say "Main model: ${primary:-not chosen}   Backups: $(fallback_list)"
@@ -192,8 +175,22 @@ case "$cmd" in
           if oc infer model run --local --model "$mdl" --prompt "Reply with OK" 2>/dev/null | grep -qi "ok"; then say "  ✓ $mdl answers"; else say "  ✗ $mdl does not answer"; fi
         done ;;
       local)
-        oc plugins install @openclaw/llama-cpp-provider --accept-capabilities >/dev/null 2>&1 || true
-        oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace"
+        # Ollama is the easy way (it manages the model download); without it, fall back to llama.cpp.
+        ollama_bin="$(command -v ollama || true)"
+        if [ -n "$ollama_bin" ]; then
+          lm="${HARU_PC_LOCAL_MODEL:-qwen3:8b}"
+          say "Ollama found. Using local model $lm."
+          "$ollama_bin" list 2>/dev/null | awk 'NR>1{print $1}' | grep -qx "$lm" || "$ollama_bin" pull "$lm"
+          oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice ollama \
+            --workspace "$HARU_HOME/workspace" >/dev/null
+          oc config set agents.defaults.model.primary "ollama/$lm" >/dev/null
+          say "Now using: ollama/$lm"
+        else
+          say "Tip: install Ollama (https://ollama.com) for the easiest local model, then run: haru-pc model local"
+          say "Continuing with llama.cpp…"
+          oc plugins install @openclaw/llama-cpp-provider --accept-capabilities >/dev/null 2>&1 || true
+          oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace "$HARU_HOME/workspace"
+        fi
         say "Small local models are easier to trick, so Haru PC turns on read-only mode. Turn it off with: haru-pc readonly off"
         oc config set plugins.entries.haru-pc.config.readOnly true >/dev/null ;;
       *) usage; exit 2 ;;

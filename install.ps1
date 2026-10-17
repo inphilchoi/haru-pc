@@ -4,6 +4,8 @@
 # Same steps as install.sh: pinned OpenClaw, Haru PC plugin/skills/persona, safe settings,
 # model choice, background start (scheduled task), security audit, pairing QR.
 # Nothing is sent to CreativeLab. Sign-ins and keys are entered by you on the provider's own page.
+# Runs inside the user's own session (irm | iex): remember their setting and put it back at the end.
+$OldEap = $ErrorActionPreference
 $ErrorActionPreference = 'Stop'
 
 $OpenClawVersion = if ($env:HARU_PC_OPENCLAW_VERSION) { $env:HARU_PC_OPENCLAW_VERSION } else { '2026.9.6' }
@@ -43,7 +45,7 @@ if (-not $have) {
   }
   $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
 }
-if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) { throw "OpenClaw did not install. Fix the problem above (usually Node.js 24.16+), then run the installer again. See $Repo#troubleshooting" }
+if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) { $ErrorActionPreference = $OldEap; throw "OpenClaw did not install. Fix the problem above (usually Node.js 24.16+), then run the installer again. See $Repo#troubleshooting" }
 
 # 2. Haru PC files
 Say "Installing Haru PC to $HaruHome…"
@@ -102,11 +104,32 @@ Say ("Connection: " + (& node $relayScript status) + "  - change anytime: haru-p
 
 # 4. AI model
 $model = (OcRead --profile $Profile_ config get agents.defaults.model.primary) -replace '[\s"{}]', ''
-# Nothing chosen (Enter, or the sign-in failed) -> start with the free model, so Haru PC works right away.
+# No free cloud model any more (OpenCode Zen's free tier ended 10/2026): if nothing ends up chosen,
+# leave it unset and say so - pairing still works, Haru just can't answer until a model is set.
 if (-not $model) {
   try { & (Join-Path $BinDir 'haru-pc.ps1') model choose } catch {}
   $model = (OcRead --profile $Profile_ config get agents.defaults.model.primary) -replace '[\s"{}]', ''
-  if (-not $model -or $model -match 'unset') { & (Join-Path $BinDir 'haru-pc.ps1') model free }
+  if (-not $model -or $model -match 'unset') {
+    Write-Warning "No AI model is set yet, so Haru can't answer. Run: haru-pc model choose   (free option: a Gemini key from aistudio.google.com/apikey)"
+  }
+}
+
+# 4b. Windows only: the gateway's TLS certificate is made with openssl.exe, and OpenClaw only looks in
+#     trusted folders. Without it the gateway crashes in a loop ("openssl not found in trusted system directories").
+$sslDirs = @((Join-Path $env:SystemRoot 'System32'), 'C:\Program Files\OpenSSL-Win64\bin', 'C:\Program Files\OpenSSL\bin')
+if (-not ($sslDirs | Where-Object { Test-Path (Join-Path $_ 'openssl.exe') })) {
+  Say 'Installing OpenSSL (needed for the encrypted connection). Windows will show an administrator (UAC) prompt - choose Yes.'
+  $sslOk = $false
+  try {
+    $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    & winget install --id ShiningLight.OpenSSL.Light -e --silent --accept-package-agreements --accept-source-agreements
+    $ErrorActionPreference = $eap
+    $sslOk = [bool]($sslDirs | Where-Object { Test-Path (Join-Path $_ 'openssl.exe') })
+  } catch { $ErrorActionPreference = $eap }
+  if (-not $sslOk) {
+    Write-Warning "OpenSSL did not install. Install 'Win64 OpenSSL Light' by hand from https://slproweb.com/products/Win32OpenSSL.html (default folder), then run the installer again."
+    Write-Host "  More: $Repo#troubleshooting"
+  }
 }
 
 # 5. background start, audit, pairing
@@ -125,3 +148,4 @@ else {
 & openclaw --profile $Profile_ security audit
 Say 'Done. Open the Haru app on your phone, say "내 PC 연결해 줘" (Connect my PC), and scan this code:'
 & (Join-Path $BinDir 'haru-pc.ps1') pair
+$ErrorActionPreference = $OldEap

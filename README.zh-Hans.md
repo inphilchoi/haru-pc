@@ -58,7 +58,7 @@ Haru PC 运行在开源个人 AI 助手 [OpenClaw](https://github.com/openclaw/o
 - 由你自己选择的 **AI 模型**：
   - **云端模型**：用已有的 ChatGPT、Grok 订阅或 GitHub Copilot 登录，或使用 API 密钥（ChatGPT、Claude、Gemini、Grok、Meta 等）。质量最好。
   - 在你电脑上运行的**本地模型**（llama.cpp 或 [Ollama](https://ollama.com)）。免费且完全私密，但速度较慢。16 GB 内存的电脑，实际能跑的上限大约是 9B 参数的模型。出于安全考虑，除非你手动修改，小型本地模型只能使用只读技能。
-  - **免费云端模型**：OpenCode Zen 的“Space Bunny”，无需注册，限时免费。用法见下方的“选择 AI 模型”。
+  - **免费方案**：[aistudio.google.com/apikey](https://aistudio.google.com/apikey) 的免费 Gemini API 密钥（安装时直接按 Enter 的默认选项），或 Ollama 本地模型。免费云端模型（OpenCode Zen）已于 2026 年 10 月结束。见下方的“选择 AI 模型”。
 
 ### 推荐配置
 
@@ -138,18 +138,12 @@ Meta（Llama、Muse）同样只能用 API 密钥连接：`haru-pc model key meta
 haru-pc model local           # 推荐适合你电脑配置的模型
 ```
 
-**或者使用免费的云端模型**，无需注册。OpenCode Zen 的“Space Bunny”限时免费（尚未公布结束日期）。消息会经过 OpenCode 的服务器，OpenCode 表示不会保存，也不会用于训练。你当前的模型会保留为备用，免费期结束后由它接手。
+**无需密钥的免费云端模型已经结束。** OpenCode Zen 的免费“Space Bunny”已于 2026 年 10 月结束（现在会返回 HTTP 403 `FreeTierError`），`haru-pc model free` 只会显示这条说明。仍有两种免费方式：
 
-```bash
-haru-pc model free
-```
+- **用免费 API 密钥使用 Gemini（默认 — 安装时直接按 Enter）。** 在 [aistudio.google.com/apikey](https://aistudio.google.com/apikey) 获取密钥，运行 `haru-pc model key gemini` 并粘贴。你的消息会按 Google 的条款发送给 Google。
+- **Ollama 本地模型** — 免费且私密，但需要性能不错的显卡或 16 GB 以上内存。安装 [Ollama](https://ollama.com) 后运行 `haru-pc model local`。若没有 `qwen3:8b`，Haru PC 会自动下载（可用 `HARU_PC_LOCAL_MODEL=<名称>` 换成别的），并开启只读模式。没有 Ollama 时会改用 llama.cpp。
 
-**用免费模型开始**
-
-1. **打开** — 安装时选择 AI 的步骤中直接按 Enter，或选 **6) 免费云端模型**；如果已经装好，运行 `haru-pc model free`。无需注册、密钥或付款。
-2. **确认** — `haru-pc model` — 看到 `opencode/space-bunny-free` 就完成了。像平常一样在手机上交代就行。
-3. **免费期结束后** — 如果之前用过其他模型，会自动切回那个模型；如果没有，用 `haru-pc model choose` 选择其他 AI。
-4. **须知** — 消息会经过 OpenCode 的服务器（OpenCode 表示不会保存，也不会用于训练）。限时免费，尚未公布结束日期。
+用 `haru-pc model` 查看结果。如果安装结束时仍未设置模型，会给出警告，连接码照常显示，之后请运行 `haru-pc model choose`。
 
 ```bash
 haru-pc model                 # 查看当前模型
@@ -227,7 +221,11 @@ haru-pc uninstall    # 停止后台服务并移除 Haru PC
 | 任务执行很慢 | 在配置较低的电脑上，本地模型会比较慢。可以用 `haru-pc model login chatgpt` 或 `haru-pc model login claude` 登录订阅 |
 | 一直没收到审批卡片 | 交代任务后可以关掉 Haru App：Haru PC 会继续处理最多 15 分钟，重新打开 Haru 时，等待中的审批卡片就会出现。如果请求 10 分钟内没有得到回应，Haru PC 会自动拒绝，不执行任何操作。打开 Haru 再说一次即可 |
 | 提示 `NodeVersion` 变量无效 / OpenClaw 安装失败 | 请重新运行上面的 Windows 命令，使用最新的安装程序。如果仍然中断，请检查 `node --version`（需要 24.16 及以上，或 26.1 及以上）。从 nodejs.org 安装 Node.js LTS，重新打开 PowerShell 窗口后再运行安装程序 |
-| Windows 上弹出管理员确认窗口 | 安装程序升级 Node.js 时出现的正常窗口，请选择“是” |
+| Windows 上弹出管理员确认窗口 | 安装程序升级 Node.js 和安装 OpenSSL 时出现的正常窗口，请选择“是” |
+| Windows 上网关不断重启 / `openssl not found in trusted system directories` | 加密连接需要 OpenSSL。安装程序会用 `winget` 安装（弹出 UAC 窗口时选择“是”）。如果失败，请从 [slproweb.com](https://slproweb.com/products/Win32OpenSSL.html) 把“Win64 OpenSSL Light”安装到默认文件夹，然后重新运行安装程序 |
+| 模型返回 `403` / `FreeTierError: OpenCode's free tier can only be used from within OpenCode` | 说明原来的免费云端模型已经结束。请改用 `haru-pc model key gemini`（免费密钥）或 `haru-pc model local`（Ollama） |
+| 需要新的配对二维码 | 运行 `haru-pc pair`。每个码有效 10 分钟，只能使用一次 |
+| 想确认 Haru PC 是否在运行 | 运行 `openclaw --profile haru gateway status`（或 `haru-pc status`）。应显示网关正在运行并在监听 |
 | 出现其他问题 | 运行 `haru-pc logs`，并把输出附在 Issue 中 |
 
 ---

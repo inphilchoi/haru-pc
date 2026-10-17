@@ -8,10 +8,14 @@ import QRCode from "qrcode";
 import { loadRelayConfig } from "./relay-bridge.js";
 
 const profile = process.env.HARU_PC_PROFILE || "haru";
-const extra = process.argv.slice(2).filter((a) => a !== "--show-code");
-// On Windows `openclaw` is an npm shim (openclaw.cmd); Node only runs .cmd files through the shell.
+const extra = process.argv.slice(2).filter((a) => a !== "--show-code" && /^--[a-z][a-z-]*$/.test(a)); // plain flags only (cmd.exe runs these on Windows)
+// On Windows `openclaw` is an npm shim (openclaw.cmd); Node only runs .cmd files through a shell.
+// Run cmd.exe ourselves instead of `shell: true` (Node warns DEP0190 when args are passed with shell: true).
 const win = process.platform === "win32";
-const out = execFileSync(win ? "openclaw.cmd" : "openclaw", ["--profile", profile, "qr", "--json", ...extra], { encoding: "utf8", shell: win });
+const args = ["--profile", profile, "qr", "--json", ...extra];
+const out = win
+  ? execFileSync(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", "openclaw.cmd", ...args], { encoding: "utf8" })
+  : execFileSync("openclaw", args, { encoding: "utf8" });
 const qr = JSON.parse(out.slice(out.indexOf("{")));
 const relay = loadRelayConfig();
 const payload = { v: 1, s: qr.setupCode };

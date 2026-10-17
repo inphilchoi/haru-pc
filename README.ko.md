@@ -58,7 +58,7 @@
 - 직접 고르는 **AI 모델**:
   - **클라우드 모델**: 이미 쓰는 ChatGPT·Grok 요금제나 GitHub Copilot으로 로그인하거나, API 키(ChatGPT·Claude·Gemini·Grok·Meta 등)를 써요. 품질이 가장 좋아요.
   - 내 컴퓨터에서 돌아가는 **로컬 모델**(llama.cpp 또는 [Ollama](https://ollama.com)). 무료이고 완전히 비공개지만 느려요. RAM 16GB라면 파라미터 약 9B 모델이 현실적인 한계예요. 안전을 위해, 작은 로컬 모델에는 설정을 바꾸지 않는 한 읽기 전용 스킬만 주어져요.
-  - **무료 클라우드 모델**: OpenCode Zen의 "Space Bunny". 가입 없이 기간 한정 무료예요. 사용법은 아래 'AI 모델 고르기'에 있어요.
+  - **무료로 쓰려면**: [aistudio.google.com/apikey](https://aistudio.google.com/apikey)의 무료 Gemini API 키(설치 중 Enter를 누르면 기본값)나 Ollama 로컬 모델을 쓰세요. 무료 클라우드 모델(OpenCode Zen)은 2026년 10월에 끝났어요. 아래 'AI 모델 고르기'를 보세요.
 
 ### 추천 구성
 
@@ -138,18 +138,12 @@ Meta(Llama·Muse)도 API 키로만 연결돼요: `haru-pc model key meta`.
 haru-pc model local           # 내 컴퓨터에 맞는 모델을 추천해요
 ```
 
-**또는 무료 클라우드 모델**도 가입 없이 쓸 수 있어요. OpenCode Zen의 "Space Bunny"는 기간 한정 무료예요(끝나는 날은 공개되지 않았어요). 메시지는 OpenCode 서버를 거치고, OpenCode는 저장하지 않고 학습에도 쓰지 않는다고 밝히고 있어요. 지금 쓰던 모델은 예비로 남아서 무료 기간이 끝나면 대신 일해요.
+**키 없이 쓰던 무료 클라우드 모델은 끝났어요.** OpenCode Zen의 무료 "Space Bunny"는 2026년 10월에 종료됐고(지금은 HTTP 403 `FreeTierError`가 나와요), `haru-pc model free`는 이 안내만 보여 줘요. 무료로 쓰는 방법은 두 가지예요.
 
-```bash
-haru-pc model free
-```
+- **무료 API 키로 Gemini 쓰기(기본값 — 설치 중 Enter만 누르면 돼요).** [aistudio.google.com/apikey](https://aistudio.google.com/apikey)에서 키를 받아 `haru-pc model key gemini`를 실행하고 붙여 넣으세요. 메시지는 Google의 약관에 따라 Google로 가요.
+- **Ollama 로컬 모델** — 무료이고 비공개지만 좋은 GPU나 16GB 이상 RAM이 필요해요. [Ollama](https://ollama.com)를 설치하고 `haru-pc model local`을 실행하세요. `qwen3:8b`가 없으면 하루 PC가 내려받고(다른 모델은 `HARU_PC_LOCAL_MODEL=<이름>`), 읽기 전용 모드를 켜요. Ollama가 없으면 llama.cpp로 진행해요.
 
-**무료 모델로 시작하기**
-
-1. **켜기** — 설치 중 AI 고르기에서 Enter만 누르거나 **6) 무료 클라우드 모델**을 고르면 돼요. 이미 설치했다면 `haru-pc model free`를 실행해요. 가입·키·결제가 필요 없어요.
-2. **확인하기** — `haru-pc model` — `opencode/space-bunny-free`가 보이면 끝이에요. 폰에서 평소처럼 맡기면 돼요.
-3. **무료가 끝나면** — 전에 쓰던 모델이 있으면 저절로 그 모델로 바뀌어요. 없으면 `haru-pc model choose`로 다른 AI를 골라요.
-4. **알아 둘 점** — 메시지는 OpenCode 서버를 거쳐요(OpenCode는 저장하지 않고 학습에도 쓰지 않는다고 밝혀요). 기간 한정 무료이고 끝나는 날은 공개되지 않았어요.
+`haru-pc model`로 확인하세요. 설치가 끝났는데 모델이 없으면 경고를 띄우고 연결 코드는 그대로 보여 줘요. 그다음 `haru-pc model choose`를 실행하세요.
 
 ```bash
 haru-pc model                 # 현재 모델 보기
@@ -227,7 +221,11 @@ haru-pc uninstall    # 백그라운드 서비스를 멈추고 하루 PC 제거
 | 작업이 느려요 | 사양이 낮은 컴퓨터에서는 로컬 모델이 느려요. `haru-pc model login chatgpt` 또는 `haru-pc model login claude`로 구독에 로그인해 보세요 |
 | 승인 카드가 오지 않아요 | 일을 맡긴 뒤에는 하루 앱을 닫아도 돼요. 하루 PC가 15분까지 일을 이어 가고, 하루를 다시 열면 기다리던 승인 카드가 떠요. 10분 안에 응답하지 않으면 하루 PC가 요청을 거절하고 아무것도 실행하지 않아요. 하루를 열고 다시 부탁해 보세요 |
 | `NodeVersion` 변수가 잘못되었다는 오류 / OpenClaw 설치 실패 | 위의 Windows 명령을 다시 실행해 최신 설치기로 설치하세요. 그래도 멈추면 `node --version`을 확인하세요(24.16 이상 또는 26.1 이상이어야 해요). nodejs.org에서 Node.js LTS를 설치하고, PowerShell 창을 새로 연 뒤 설치기를 다시 실행하세요 |
-| Windows에서 관리자 확인 창이 떠요 | 설치기가 Node.js를 올릴 때 나오는 정상 창이에요. **예**를 누르세요 |
+| Windows에서 관리자 확인 창이 떠요 | 설치기가 Node.js를 올릴 때, 그리고 OpenSSL을 설치할 때 나오는 정상 창이에요. **예**를 누르세요 |
+| Windows에서 게이트웨이가 계속 다시 시작돼요 / `openssl not found in trusted system directories` | 암호화 연결에 OpenSSL이 필요해요. 설치기가 `winget`으로 설치해요(UAC 창이 뜨면 **예**). 실패했다면 [slproweb.com](https://slproweb.com/products/Win32OpenSSL.html)에서 "Win64 OpenSSL Light"를 기본 폴더에 설치한 뒤 설치기를 다시 실행하세요 |
+| 모델이 `403` / `FreeTierError: OpenCode's free tier can only be used from within OpenCode`라고 답해요 | 예전 무료 클라우드 모델이 끝났다는 뜻이에요. `haru-pc model key gemini`(무료 키) 또는 `haru-pc model local`(Ollama)로 바꾸세요 |
+| 새 연결 QR이 필요해요 | `haru-pc pair`를 실행하세요. 코드는 10분 동안만, 한 번만 쓸 수 있어요 |
+| 하루 PC가 켜져 있는지 보고 싶어요 | `openclaw --profile haru gateway status`(또는 `haru-pc status`)를 실행하세요. 게이트웨이가 실행 중이고 연결을 기다리고 있다고 나와야 해요 |
 | 뭔가 잘못됐어요 | `haru-pc logs`를 실행하고 출력 내용을 이슈에 첨부해 주세요 |
 
 ---

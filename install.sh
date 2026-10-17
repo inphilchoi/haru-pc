@@ -7,7 +7,7 @@
 #   2. copies Haru PC (plugin, skills, persona) to ~/.haru-pc and adds the `haru-pc` command
 #   3. applies safe settings: shell commands need approval, encrypted connections (TLS),
 #      reachable only on your local network, local-network discovery on
-#   4. lets you choose an AI model (sign in, API key, or local model)
+#   4. lets you choose an AI model (sign in, API key such as a free Gemini key, or a local Ollama model)
 #   5. starts Haru PC in the background and shows a pairing QR code for the Haru app
 set -euo pipefail
 
@@ -97,11 +97,12 @@ esac
 say "Connection: $(HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" status)  — change anytime: haru-pc relay on|off"
 
 # ---- 4. AI model -----------------------------------------------------------------------------
-# Nothing chosen (Enter, no terminal, or the sign-in failed) → start with the free model, so Haru PC works right away.
+# No free cloud model any more (OpenCode Zen's free tier ended 10/2026): if nothing ends up chosen,
+# leave it unset and say so — pairing still works, Haru just can't answer until a model is set.
 model_now() { oc config get agents.defaults.model.primary 2>/dev/null | tr -d '"{} \n'; }
 if [ -z "$(model_now)" ]; then
   "$BIN_DIR/haru-pc" model choose </dev/tty 2>/dev/null || true
-  [ -n "$(model_now)" ] || "$BIN_DIR/haru-pc" model free || say "You can choose a model later with: haru-pc model choose"
+  [ -n "$(model_now)" ] || say "WARNING: no AI model is set yet, so Haru can't answer. Run: haru-pc model choose   (free option: a Gemini key from aistudio.google.com/apikey)"
 fi
 
 # ---- 5. background service, audit, pairing ---------------------------------------------------

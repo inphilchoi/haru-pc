@@ -58,7 +58,7 @@ Les compétences peuvent être ajoutées, activées ou désactivées. Voir [Comp
 - **Un modèle d'IA**, à votre choix :
   - **Modèle cloud :** connectez-vous avec un abonnement ChatGPT ou Grok ou GitHub Copilot existant, ou utilisez une clé API (ChatGPT, Claude, Gemini, Grok, Meta, etc.). C'est la meilleure qualité.
   - **Modèle local** exécuté sur votre ordinateur (llama.cpp ou [Ollama](https://ollama.com)). Il est gratuit et entièrement privé, mais plus lent. Avec 16 Go de RAM, un modèle d'environ 9 milliards de paramètres est la limite en pratique. Par sécurité, les petits modèles locaux n'ont accès qu'à des compétences en lecture seule, sauf si vous modifiez ce réglage.
-  - **Modèle cloud gratuit :** « Space Bunny » d'OpenCode Zen, sans inscription, gratuit pour une durée limitée. Mode d'emploi plus bas, dans « Choisir votre modèle d'IA ».
+  - **Option gratuite :** une clé API Gemini gratuite sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (choix par défaut en appuyant sur Entrée dans l'installateur) ou un modèle local avec Ollama. Le modèle cloud gratuit (OpenCode Zen) a pris fin en octobre 2026. Voir « Choisir votre modèle d'IA ».
 
 ### Configuration conseillée
 
@@ -138,18 +138,12 @@ Meta (Llama, Muse) se connecte lui aussi uniquement avec une clé API : `haru-pc
 haru-pc model local           # recommande un modèle adapté à votre ordinateur
 ```
 
-**Ou un modèle cloud gratuit**, sans inscription : « Space Bunny » d'OpenCode Zen est gratuit pour une durée limitée (aucune date de fin annoncée). Vos messages passent par les serveurs d'OpenCode, qui indique ne pas les conserver ni les utiliser pour l'entraînement. Votre modèle actuel reste en secours et prend le relais à la fin de la période gratuite.
+**Il n'existe plus de modèle cloud gratuit sans clé.** Le « Space Bunny » gratuit d'OpenCode Zen a pris fin en octobre 2026 (il répond désormais HTTP 403 `FreeTierError`), et `haru-pc model free` renvoie seulement ici. Deux voies gratuites restent :
 
-```bash
-haru-pc model free
-```
+- **Gemini avec une clé API gratuite (par défaut — appuyez sur Entrée dans l'installateur).** Obtenez une clé sur [aistudio.google.com/apikey](https://aistudio.google.com/apikey), lancez `haru-pc model key gemini` et collez-la. Vos messages vont à Google selon les conditions de Google.
+- **Un modèle local avec Ollama** — gratuit et privé, mais il faut un bon GPU ou 16 Go de RAM ou plus. Installez [Ollama](https://ollama.com), puis lancez `haru-pc model local`. Haru PC télécharge `qwen3:8b` s'il manque (un autre avec `HARU_PC_LOCAL_MODEL=<nom>`) et active le mode lecture seule. Sans Ollama, il utilise llama.cpp.
 
-**Commencer avec le modèle gratuit**
-
-1. **Activez-le** — Quand l'installateur demande une IA, appuyez simplement sur Entrée ou choisissez **6) Modèle cloud gratuit**. Si Haru PC est déjà installé, lancez `haru-pc model free`. Ni inscription, ni clé, ni paiement.
-2. **Vérifiez** — `haru-pc model` : si vous voyez `opencode/space-bunny-free`, c'est prêt. Confiez vos tâches depuis le téléphone comme d'habitude.
-3. **À la fin de la période gratuite** — Si vous utilisiez un autre modèle avant, Haru PC y revient tout seul. Sinon, choisissez une autre IA avec `haru-pc model choose`.
-4. **Bon à savoir** — Vos messages passent par les serveurs d'OpenCode (qui indique ne pas les conserver ni les utiliser pour l'entraînement). C'est gratuit pour une durée limitée, sans date de fin annoncée.
+Vérifiez avec `haru-pc model`. Si l'installateur se termine sans modèle, il vous avertit et affiche quand même le code d'appairage ; lancez ensuite `haru-pc model choose`.
 
 ```bash
 haru-pc model                 # affiche le modèle actuel
@@ -227,7 +221,11 @@ Vos réglages restent dans `~/.haru-pc` tant que vous ne supprimez pas ce dossie
 | Les tâches sont lentes | Un modèle local sur une machine modeste est lent. Connectez-vous à un abonnement avec `haru-pc model login chatgpt` ou `haru-pc model login claude` |
 | Aucune carte d'approbation n'est apparue | Vous pouvez fermer Haru après avoir confié une tâche : Haru PC continue jusqu'à 15 minutes, et les cartes d'approbation en attente s'affichent quand vous rouvrez Haru. Si une demande reste sans réponse pendant 10 minutes, Haru PC la refuse et rien ne s'exécute. Ouvrez Haru et redemandez |
 | Erreur indiquant que la variable `NodeVersion` est non valide / échec de l'installation d'OpenClaw | Relancez la commande Windows ci-dessus pour utiliser le dernier installateur. S'il s'arrête encore, vérifiez `node --version` : il faut la version 24.16 ou ultérieure (ou 26.1 ou ultérieure). Installez Node.js LTS depuis nodejs.org, ouvrez une nouvelle fenêtre PowerShell, puis relancez l'installateur |
-| Une fenêtre de confirmation administrateur apparaît sous Windows | C'est normal quand l'installateur met à jour Node.js. Choisissez **Oui** |
+| Une fenêtre de confirmation administrateur apparaît sous Windows | C'est normal quand l'installateur met à jour Node.js, et quand il installe OpenSSL. Choisissez **Oui** |
+| Windows : la passerelle redémarre en boucle / `openssl not found in trusted system directories` | La connexion chiffrée a besoin d'OpenSSL. L'installateur l'installe avec `winget` (une fenêtre UAC apparaît : **Oui**). En cas d'échec, installez « Win64 OpenSSL Light » depuis [slproweb.com](https://slproweb.com/products/Win32OpenSSL.html) dans son dossier par défaut, puis relancez l'installateur |
+| Le modèle répond `403` / `FreeTierError: OpenCode's free tier can only be used from within OpenCode` | L'ancien modèle cloud gratuit a pris fin. Passez à `haru-pc model key gemini` (clé gratuite) ou `haru-pc model local` (Ollama) |
+| Il me faut un nouveau QR code d'appairage | Lancez `haru-pc pair`. Chaque code est valable 10 minutes et ne sert qu'une fois |
+| Haru PC fonctionne-t-il ? | Lancez `openclaw --profile haru gateway status` (ou `haru-pc status`). La passerelle doit être indiquée en cours d'exécution et à l'écoute |
 | Quelque chose s'est mal passé | Exécutez `haru-pc logs` et joignez la sortie à une issue |
 
 ---

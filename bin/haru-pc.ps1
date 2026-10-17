@@ -17,7 +17,14 @@ $a2 = if ($Args_.Count -gt 2) { $Args_[2] } else { '' }
 
 switch ($cmd) {
   # One code for everything: setup code + the encrypted relay (works away from home too). Plain `openclaw qr` only works on the same Wi-Fi.
-  'pair'    { $env:HARU_PC_HOME = $HaruHome; $env:HARU_PC_PROFILE = $Profile_; & node (Join-Path $HaruHome 'app\plugin\pair.mjs') @($Args_ | Select-Object -Skip 1) }
+  'pair'    {
+    $env:HARU_PC_HOME = $HaruHome; $env:HARU_PC_PROFILE = $Profile_
+    # UTF-8 so the QR block characters and Korean text survive when the output is piped or captured.
+    $oldEnc = [Console]::OutputEncoding
+    try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch {}
+    try { & node (Join-Path $HaruHome 'app\plugin\pair.mjs') @($Args_ | Select-Object -Skip 1) }
+    finally { try { [Console]::OutputEncoding = $oldEnc } catch {} }
+  }
   'approve' { Oc devices approve --latest }
   'unpair'  { Oc devices list; $id = Read-Host 'Device id to remove'; Oc devices remove $id }
   'status'  { Oc gateway status; Oc devices list }
@@ -30,17 +37,16 @@ switch ($cmd) {
 Which AI should Haru PC use?
   1) ChatGPT (OpenAI)      - sign in with your plan, or an API key
   2) Claude (Anthropic)    - API key (plan sign-in isn't allowed by Anthropic's terms)
-  3) Gemini (Google)       - API key (free key at aistudio.google.com/apikey)
+  3) Gemini (Google)       - free API key from aistudio.google.com/apikey  (Enter)
   4) Grok (xAI)            - sign in with SuperGrok / X Premium, or an API key
   5) Meta (Llama / Muse)   - API key
-  6) Free cloud model      - OpenCode Zen "Space Bunny", no sign-up, limited time  (Enter)
+  6) Local model with Ollama - free, private, needs a good GPU / 16 GB+ RAM
   7) GitHub Copilot        - sign in
   8) Other API key         - Mistral, DeepSeek, OpenRouter...
-  9) Local model           - free, private, slower (16 GB RAM or more recommended)
 Sign-ins happen on each company's own page. Haru PC never asks for your password.
 '@
-        $n = ''; try { $n = Read-Host 'Choose 1-9 [6]' } catch {}
-        if (-not $n) { $n = '6' }
+        $n = ''; try { $n = Read-Host 'Choose 1-8 [3]' } catch {}
+        if (-not $n) { $n = '3' }
         function How($prov) {
           $h = ''; try { $h = Read-Host '  1) Sign in with your account   2) API key   [1]' } catch {}
           if ($h -eq '2') { & $PSCommandPath model key $prov } else { & $PSCommandPath model login $prov }
@@ -55,11 +61,10 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
           '3' { & $PSCommandPath model key gemini }
           '4' { How 'grok' }
           '5' { & $PSCommandPath model key meta }
-          '6' { & $PSCommandPath model free }
+          '6' { & $PSCommandPath model local }
           '7' { & $PSCommandPath model login copilot }
           '8' { $p = Read-Host 'Provider (mistral, deepseek, openrouter...)'; & $PSCommandPath model key $p }
-          '9' { & $PSCommandPath model local }
-          default { Say 'Not a choice - starting with the free model. Change any time: haru-pc model choose'; & $PSCommandPath model free }
+          default { Say "Not a choice - using Gemini's free key. Change any time: haru-pc model choose"; & $PSCommandPath model key gemini }
         }
       }
       'login' {
@@ -103,17 +108,11 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
         if ($now -and $now -notmatch 'unset') { Say "Now using: $now" } else { if ($prev) { Oc config set agents.defaults.model.primary $prev | Out-Null }; Say "Key setup didn't finish. Still using: $prev"; exit 1 }
       }
       'free' {
-        # Same as bin/haru-pc: no account needed ("public" key); the current model becomes the backup.
-        $free = 'opencode/space-bunny-free'
-        $prev = ''
-        try { $prev = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', '' } catch {}
-        Oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice opencode-zen --opencode-zen-api-key public --workspace $Ws | Out-Null
-        Oc config set agents.defaults.model.primary $free | Out-Null
-        if ($prev -and $prev -ne $free -and $prev -notmatch 'unset') {
-          Oc config set agents.defaults.model.fallbacks ('["' + $prev + '"]') --json | Out-Null
-          Say "Free model on. When the free period ends, Haru PC goes back to: $prev"
-        } else { Say 'Free model on. It is free for a limited time - when it ends, choose another AI with: haru-pc model choose' }
-        Say "Your messages to Haru PC go through OpenCode's servers (they say: not stored, not used for training)."
+        # OpenCode Zen's free tier ended (403 FreeTierError: "can only be used from within OpenCode", checked 2026-10-17).
+        Say 'The free cloud model (OpenCode Zen) ended in October 2026.'
+        Say 'Free alternatives: a Gemini key (https://aistudio.google.com/apikey) -> haru-pc model key gemini'
+        Say '                   or a model on this computer              -> haru-pc model local'
+        exit 2
       }
       'check' {
         $primary = ((OcRead config get agents.defaults.model.primary) -join '') -replace '[\s"{}]', ''
@@ -126,8 +125,27 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
         }
       }
       'local' {
-        Oc plugins install '@openclaw/llama-cpp-provider' --accept-capabilities | Out-Null
-        Oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace $Ws
+        # Ollama is the easy way (it manages the model download); without it, fall back to llama.cpp.
+        $ollama = $null
+        $cmdO = Get-Command ollama -ErrorAction SilentlyContinue
+        if ($cmdO) { $ollama = $cmdO.Source }
+        elseif ($env:LOCALAPPDATA -and (Test-Path (Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe'))) { $ollama = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe' }
+        if ($ollama) {
+          $lm = if ($env:HARU_PC_LOCAL_MODEL) { $env:HARU_PC_LOCAL_MODEL } else { 'qwen3:8b' }
+          Say "Ollama found. Using local model $lm."
+          $eap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+          $have = (& $ollama list 2>$null) -split "`n" | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s+')[0] }
+          $ErrorActionPreference = $eap
+          if ($have -notcontains $lm) { & $ollama pull $lm; if ($LASTEXITCODE -ne 0) { Say "Couldn't download $lm. Is Ollama running?"; exit 1 } }
+          Oc onboard --non-interactive --accept-risk --skip-health --no-install-daemon --auth-choice ollama --workspace $Ws | Out-Null
+          Oc config set agents.defaults.model.primary "ollama/$lm" | Out-Null
+          Say "Now using: ollama/$lm"
+        } else {
+          Say 'Tip: install Ollama (https://ollama.com) for the easiest local model, then run: haru-pc model local'
+          Say 'Continuing with llama.cpp...'
+          try { Oc plugins install '@openclaw/llama-cpp-provider' --accept-capabilities | Out-Null } catch {}
+          Oc onboard --auth-choice llama-cpp --skip-health --no-install-daemon --workspace $Ws
+        }
         Oc config set plugins.entries.haru-pc.config.readOnly true | Out-Null
         Say 'Small local models are easier to trick, so read-only mode is on. Turn it off with: haru-pc readonly off'
       }
