@@ -9,7 +9,9 @@ import { loadRelayConfig } from "./relay-bridge.js";
 
 const profile = process.env.HARU_PC_PROFILE || "haru";
 const extra = process.argv.slice(2).filter((a) => a !== "--show-code");
-const out = execFileSync("openclaw", ["--profile", profile, "qr", "--json", ...extra], { encoding: "utf8" });
+// On Windows `openclaw` is an npm shim (openclaw.cmd); Node only runs .cmd files through the shell.
+const win = process.platform === "win32";
+const out = execFileSync(win ? "openclaw.cmd" : "openclaw", ["--profile", profile, "qr", "--json", ...extra], { encoding: "utf8", shell: win });
 const qr = JSON.parse(out.slice(out.indexOf("{")));
 const relay = loadRelayConfig();
 const payload = { v: 1, s: qr.setupCode };

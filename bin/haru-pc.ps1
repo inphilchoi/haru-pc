@@ -1,4 +1,4 @@
-# haru-pc for Windows — same commands as bin/haru-pc (see `haru-pc help`).
+﻿# haru-pc for Windows — same commands as bin/haru-pc (see `haru-pc help`).
 # Sign-ins and keys are entered by YOU on the provider's page or prompt; this script never asks for passwords.
 param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args_)
 $ErrorActionPreference = 'Stop'
