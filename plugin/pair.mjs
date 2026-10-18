@@ -48,13 +48,15 @@ function openImage(file) {
       "$f.Controls.AddRange(@($pb,$l)); $t=New-Object Windows.Forms.Timer; $t.Interval=600000; $t.add_Tick({$f.Close()}); $t.Start()",
       "[void]$f.ShowDialog(); $img.Dispose(); Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue",
     ].join("; ");
-    // Run from a small .ps1 next to the picture (removed with it). Detached = no console window at all;
-    // never pass -WindowStyle Hidden - it hides the QR form too.
+    // Run from a small .ps1 next to the picture (removed with it). Node puts its children in a job that is closed when
+    // Node exits, so a detached/unref'd window dies with us - wait for it instead (the command ends when the window closes).
+    // No windowsHide / -WindowStyle Hidden: Windows applies that to the first window shown, which is the QR form.
     const script = file.replace(/\.png$/, ".ps1");
     try {
       writeFileSync(script, ps + `; Remove-Item -LiteralPath '${script.replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue`, "utf8");
-      spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", script], { detached: true, stdio: "ignore" }).unref();
-      return true;
+      console.log("QR 창을 열었어요. 폰 하루 앱에서 '내 PC 연결해 줘' 하고 찍으세요. (10분 안, 한 번만 쓸 수 있어요)");
+      console.log("Close the QR window when done. Can't see it? Run: haru-pc pair --terminal");
+      return spawnSync("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", script], { stdio: "ignore" }).status === 0 ? "waited" : false;
     } catch { return false; }
   }
   const [cmd, a] = [process.platform === "darwin" ? "open" : "xdg-open", [file]];
@@ -68,12 +70,15 @@ if (!wantTerminal) {
     await QRCode.toFile(png, code, { type: "png", width: 300, margin: 2, errorCorrectionLevel: "L" });
     try { chmodSync(png, 0o600); } catch {}
     if (hasDesktop()) opened = openImage(png);
-    if (opened) {
+    if (opened === "waited") rmSync(png, { force: true });
+    else if (opened) {
       spawn(process.execPath, ["-e", `setTimeout(()=>{try{require("fs").rmSync(${JSON.stringify(png)},{force:true})}catch{}},600000)`], { detached: true, stdio: "ignore", windowsHide: true }).unref();
     } else rmSync(png, { force: true });
   } catch { opened = false; }
 }
-if (opened) {
+if (opened === "waited") {
+  // Windows: the window was shown and closed above.
+} else if (opened) {
   console.log("QR 창을 열었어요. 폰 하루 앱에서 '내 PC 연결해 줘' 하고 찍으세요. (10분 안, 한 번만 쓸 수 있어요)");
   console.log("If the window is hidden, look for it on the taskbar. Can't see it? Run: haru-pc pair --terminal");
 } else {
