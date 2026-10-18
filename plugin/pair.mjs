@@ -4,7 +4,7 @@
 //   - the relay room, access token and end-to-end key (to reach this computer from anywhere)
 // Code format: "haru1." + base64url(JSON {v:1, s:<setupCode>, r:{u, room, t, k}})
 import { execFileSync, spawn, spawnSync } from "node:child_process";
-import { mkdirSync, rmSync, chmodSync } from "node:fs";
+import { mkdirSync, rmSync, chmodSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import QRCode from "qrcode";
@@ -41,16 +41,18 @@ function openImage(file) {
   if (win) {
     const ps = [
       "Add-Type -AssemblyName System.Windows.Forms,System.Drawing",
-      `$p=${JSON.stringify(file).replace(/"/g, "'")}`,
+      `$p='${file.replace(/'/g, "''")}'`,
       "$f=New-Object Windows.Forms.Form; $f.Text='Haru PC'; $f.TopMost=$true; $f.FormBorderStyle='FixedDialog'; $f.MaximizeBox=$false; $f.MinimizeBox=$false; $f.StartPosition='CenterScreen'; $f.ClientSize=New-Object Drawing.Size(280,316)",
       "$img=[Drawing.Image]::FromFile($p); $pb=New-Object Windows.Forms.PictureBox; $pb.Image=$img; $pb.SizeMode='Zoom'; $pb.SetBounds(10,10,260,260)",
       "$l=New-Object Windows.Forms.Label; $l.Text=[string]::Concat([char]0xD558,[char]0xB8E8,' app: ',[char]0xB0B4,' PC ',[char]0xC5F0,[char]0xACB0,[char]0xD574,' ',[char]0xC918,' (10 min)'); $l.TextAlign='MiddleCenter'; $l.SetBounds(10,276,260,30)",
       "$f.Controls.AddRange(@($pb,$l)); $t=New-Object Windows.Forms.Timer; $t.Interval=600000; $t.add_Tick({$f.Close()}); $t.Start()",
       "[void]$f.ShowDialog(); $img.Dispose(); Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue",
     ].join("; ");
-    const enc = Buffer.from(ps, "utf16le").toString("base64");
+    // Run from a small .ps1 next to the picture (removed with it); not hidden - a hidden start also hides the form.
+    const script = file.replace(/\.png$/, ".ps1");
     try {
-      spawn("powershell.exe", ["-NoProfile", "-STA", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-EncodedCommand", enc], { detached: true, stdio: "ignore", windowsHide: true }).unref();
+      writeFileSync(script, ps + `; Remove-Item -LiteralPath '${script.replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue`, "utf8");
+      spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", script], { detached: true, stdio: "ignore" }).unref();
       return true;
     } catch { return false; }
   }
