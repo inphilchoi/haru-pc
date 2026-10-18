@@ -26,7 +26,7 @@ if (relay.enabled !== false) payload.r = { u: relay.url, room: relay.room, t: re
 const code = "haru1." + Buffer.from(JSON.stringify(payload)).toString("base64url");
 
 // The code carries the relay key, so the QR is shown in a small picture window (a big console QR got cut off on
-// real PCs). The PNG is private (mode 600) and is removed after 10 minutes - the same time the setup code expires -
+// real PCs, and filled the whole screen on Windows). Error correction L keeps the code small; it is read off a screen. The PNG is private (mode 600) and is removed after 10 minutes - the same time the setup code expires -
 // by a tiny detached helper, because this process exits right away. The next `pair` overwrites it anyway.
 const wantTerminal = process.argv.includes("--terminal");
 const png = join(process.env.HARU_PC_HOME || join(homedir(), ".haru-pc"), "pair-qr.png");
@@ -37,8 +37,24 @@ function hasDesktop() {
   return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY) && spawnSync("sh", ["-c", "command -v xdg-open"]).status === 0;
 }
 function openImage(file) {
-  // Windows: `start "" file` (the empty title must be its own argument).
-  const [cmd, a] = win ? [process.env.ComSpec || "cmd.exe", ["/d", "/c", "start", "", file]] : [process.platform === "darwin" ? "open" : "xdg-open", [file]];
+  // Windows: a small fixed-size window of its own (the Photos app stretches the picture to a big window).
+  if (win) {
+    const ps = [
+      "Add-Type -AssemblyName System.Windows.Forms,System.Drawing",
+      `$p=${JSON.stringify(file).replace(/"/g, "'")}`,
+      "$f=New-Object Windows.Forms.Form; $f.Text='Haru PC'; $f.TopMost=$true; $f.FormBorderStyle='FixedDialog'; $f.MaximizeBox=$false; $f.MinimizeBox=$false; $f.StartPosition='CenterScreen'; $f.ClientSize=New-Object Drawing.Size(280,316)",
+      "$img=[Drawing.Image]::FromFile($p); $pb=New-Object Windows.Forms.PictureBox; $pb.Image=$img; $pb.SizeMode='Zoom'; $pb.SetBounds(10,10,260,260)",
+      "$l=New-Object Windows.Forms.Label; $l.Text=[string]::Concat([char]0xD558,[char]0xB8E8,' app: ',[char]0xB0B4,' PC ',[char]0xC5F0,[char]0xACB0,[char]0xD574,' ',[char]0xC918,' (10 min)'); $l.TextAlign='MiddleCenter'; $l.SetBounds(10,276,260,30)",
+      "$f.Controls.AddRange(@($pb,$l)); $t=New-Object Windows.Forms.Timer; $t.Interval=600000; $t.add_Tick({$f.Close()}); $t.Start()",
+      "[void]$f.ShowDialog(); $img.Dispose(); Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue",
+    ].join("; ");
+    const enc = Buffer.from(ps, "utf16le").toString("base64");
+    try {
+      spawn("powershell.exe", ["-NoProfile", "-STA", "-WindowStyle", "Hidden", "-ExecutionPolicy", "Bypass", "-EncodedCommand", enc], { detached: true, stdio: "ignore", windowsHide: true }).unref();
+      return true;
+    } catch { return false; }
+  }
+  const [cmd, a] = [process.platform === "darwin" ? "open" : "xdg-open", [file]];
   return spawnSync(cmd, a, { stdio: "ignore", timeout: 10000, windowsHide: true }).status === 0;
 }
 
@@ -46,7 +62,7 @@ let opened = false;
 if (!wantTerminal) {
   try {
     mkdirSync(join(png, ".."), { recursive: true });
-    await QRCode.toFile(png, code, { type: "png", width: 420, margin: 2, errorCorrectionLevel: "M" });
+    await QRCode.toFile(png, code, { type: "png", width: 300, margin: 2, errorCorrectionLevel: "L" });
     try { chmodSync(png, 0o600); } catch {}
     if (hasDesktop()) opened = openImage(png);
     if (opened) {
@@ -58,7 +74,7 @@ if (opened) {
   console.log("QR 창을 열었어요. 폰 하루 앱에서 '내 PC 연결해 줘' 하고 찍으세요. (10분 안, 한 번만 쓸 수 있어요)");
   console.log("If the window is hidden, look for it on the taskbar. Can't see it? Run: haru-pc pair --terminal");
 } else {
-  console.log(await QRCode.toString(code, { type: "terminal", small: true, errorCorrectionLevel: "M" }));
+  console.log(await QRCode.toString(code, { type: "terminal", small: true, errorCorrectionLevel: "L" }));
   console.log("Scan this with the Haru app (\"내 PC 연결해 줘\"). Valid for 10 minutes, one use.");
   if (!wantTerminal) console.log("(Couldn't open a picture window here, so the code is shown in the console. If it is cut off, make the window bigger or smaller text.)");
 }
