@@ -48,11 +48,12 @@ function openImage(file) {
       "$f.Controls.AddRange(@($pb,$l)); $t=New-Object Windows.Forms.Timer; $t.Interval=600000; $t.add_Tick({$f.Close()}); $t.Start()",
       "[void]$f.ShowDialog(); $img.Dispose(); Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue",
     ].join("; ");
-    // Run from a small .ps1 next to the picture (removed with it); not hidden - a hidden start also hides the form.
+    // Run from a small .ps1 next to the picture (removed with it). Detached = no console window at all;
+    // never pass -WindowStyle Hidden - it hides the QR form too.
     const script = file.replace(/\.png$/, ".ps1");
     try {
       writeFileSync(script, ps + `; Remove-Item -LiteralPath '${script.replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue`, "utf8");
-      spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", script], { detached: true, stdio: "ignore" }).unref();
+      spawn("powershell.exe", ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", script], { detached: true, stdio: "ignore" }).unref();
       return true;
     } catch { return false; }
   }
