@@ -17,6 +17,7 @@ import path from "node:path";
 import { startRelayBridge } from "./relay-bridge.js";
 import { CHAIN_BLOCK_REASON, SETTINGS_BLOCK_REASON, isChainedCommand, touchesSafetySettings } from "./safety.js";
 import { TITLE_MAX, clip, describe, describeCommand } from "./cards.js";
+import { isReadOnlyCommand, isSkillLookupCode, languageContext } from "./readonly.js";
 import { INSTALL_HINT, TOOL_NAME as OPENCODE_TOOL, findOpencode, runOpencode } from "./opencode.js";
 
 // Tools that only look at things. Everything else needs a phone approval.
@@ -86,10 +87,6 @@ export default definePluginEntry({
       if (tool === "tool_call") return;
       if (tool === "process" && PROCESS_READ_ACTIONS.has(String(event.params?.action ?? ""))) return;
 
-      if (readOnly) {
-        return { block: true, blockReason: "Haru PC is in read-only mode, so it can look but not change anything. (하루 PC 가 읽기 전용이라 바꿀 수 없어요)" };
-      }
-
       const base = ctx?.cwd ?? ctx?.workspaceDir ?? workspace ?? process.cwd();
       const paths = targetPaths(event, path.resolve(expandHome(String(base))));
       const outside = paths.filter((p) => !folders.some((f) => inside(p, f)));
@@ -107,6 +104,18 @@ export default definePluginEntry({
         if (isChainedCommand(event.params)) return { block: true, blockReason: CHAIN_BLOCK_REASON };
       }
 
+      // Looking is not changing. The job was already approved on the phone, so plain look-only
+      // work (reading a skill, listing a folder, free disk space) runs without a second card —
+      // also in read-only mode. Anything not recognised keeps the card (or the read-only block).
+      if (EXEC_TOOLS.has(tool)) {
+        if (isSkillLookupCode(event.params)) return;
+        if (isReadOnlyCommand(event.params, { base: path.resolve(expandHome(String(base))), inside: (p) => folders.some((f) => inside(p, f)) })) return;
+      }
+
+      if (readOnly) {
+        return { block: true, blockReason: "Haru PC is in read-only mode, so it can look but not change anything. (하루 PC 가 읽기 전용이라 바꿀 수 없어요)" };
+      }
+
       if (tool === OPENCODE_TOOL && !paths.length) {
         return { block: true, blockReason: "Say which allowed folder the code is in. (코드가 있는 폴더를 알려 주세요)" };
       }
@@ -121,6 +130,12 @@ export default definePluginEntry({
         },
       };
     }, { priority: 100 });
+
+    // The PC's AI answers in Korean when the person writes Korean (it used to reply in English).
+    api.on("before_prompt_build", (event) => {
+      const appendSystemContext = languageContext(event?.currentUserMessage ?? event?.prompt);
+      return appendSystemContext ? { appendSystemContext } : undefined;
+    });
 
     // Coding jobs go to opencode, boxed into one allowed folder (see opencode.js).
     // The phone approval above is the gate: one card per job, showing the folder and the task.
