@@ -8,6 +8,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import WebSocket from "ws";
+import { MUSE_FILE, answerFrame, loadMuse, museHash } from "./muse-mcp.js";
 
 export const RELAY_FILE = path.join(process.env.HARU_PC_HOME || path.join(os.homedir(), ".haru-pc"), "relay.json");
 export const DEFAULT_RELAY_URL = "wss://haru-relay.creativelab-choi.workers.dev";
@@ -128,7 +129,7 @@ class LocalSession {
  * Keep this computer reachable through the relay until `signal` aborts.
  * gatewayUrl: this gateway on loopback (ws:// or wss:// with its self-signed certificate).
  */
-export function startRelayBridge({ gatewayUrl, signal, log = () => {}, lingerMs = LINGER_MS, loadConfig = loadRelayConfig, connectRelay }) {
+export function startRelayBridge({ gatewayUrl, signal, log = () => {}, lingerMs = LINGER_MS, loadConfig = loadRelayConfig, connectRelay, museFile = MUSE_FILE, loadMuseConfig = loadMuse, museOpts = {} }) {
   const cfg = loadConfig();
   if (cfg.enabled === false) { log("relay off"); return () => {}; }
   const sessions = new Map(); // sid → LocalSession the phone is using
@@ -138,6 +139,12 @@ export function startRelayBridge({ gatewayUrl, signal, log = () => {}, lingerMs 
   let backoff = 1000;
 
   const toRelay = (obj) => { if (relay?.readyState === WebSocket.OPEN) relay.send(JSON.stringify(obj)); };
+  // Muse (opt-in, `haru-pc muse`): tell the relay which token hash may call in (null = off). Sent on every
+  // connect and whenever muse.json changes, so on/off/rotate work without restarting Haru PC.
+  const syncMuse = () => {
+    const m = loadMuseConfig();
+    toRelay({ t: "muse_set", h: m.enabled ? museHash(cfg.room, m.token) : null });
+  };
   const toPhone = (sid, text) => toRelay({ t: "msg", sid, d: seal(cfg.key, text, cfg.room, sid, "c2p") });
 
   function dropLingering(sid, s) {
@@ -204,10 +211,11 @@ export function startRelayBridge({ gatewayUrl, signal, log = () => {}, lingerMs 
     if (stopped) return;
     const url = `${cfg.url.replace(/\/$/, "")}/r/${cfg.room}?role=pc`;
     relay = connectRelay ? connectRelay(url, cfg) : new WebSocket(url, { headers: { "X-Haru-Relay-Token": cfg.token } });
-    relay.on("open", () => { backoff = 1000; log("relay connected"); });
+    relay.on("open", () => { backoff = 1000; log("relay connected"); syncMuse(); });
     relay.on("message", (raw) => {
       const f = parse(raw.toString("utf8"));
       if (!f) return;
+      if (f.t === "mcp") { toRelay(answerFrame(f, cfg.room, { load: loadMuseConfig, ...museOpts })); return; } // no body logging
       if (f.t === "open") openLocal(f.sid);
       else if (f.t === "close") { const s = sessions.get(f.sid); if (s) park(f.sid, s); }
       else if (f.t === "msg") {
@@ -229,6 +237,7 @@ export function startRelayBridge({ gatewayUrl, signal, log = () => {}, lingerMs 
 
   const stop = () => {
     stopped = true;
+    fs.unwatchFile(museFile, syncMuse);
     relay?.close();
     for (const s of sessions.values()) s.close();
     for (const list of lingering.values()) list.forEach((s) => s.close());
@@ -236,6 +245,7 @@ export function startRelayBridge({ gatewayUrl, signal, log = () => {}, lingerMs 
     lingering.clear();
   };
   signal?.addEventListener("abort", stop, { once: true });
+  fs.watchFile(museFile, { interval: 2000, persistent: false }, syncMuse);
   connect();
   return stop;
 }
