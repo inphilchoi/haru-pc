@@ -118,6 +118,8 @@ haru-pc muse
 
 Paste the **one sentence** it prints (it is also copied to your clipboard) into Muse's chat. It contains a secret address only you know — don't send it to anyone.
 
+When Muse asks whether it may share information with the relay address, choose **Allow** (it may ask on each tool call).
+
 - Muse can only **read** the file list and text files (up to 64 KB) in `~/HaruShare` (`%USERPROFILE%\HaruShare` on Windows), and ask the current time. There is no tool that changes your computer or looks at other folders.
 - Unlike the phone connection, this link is **not** end-to-end encrypted (Muse can't hold our key), so only put files in the shared folder that you are fine showing to Muse.
 - If the address leaks: `haru-pc muse rotate` (new address, the old one stops at once). Turn it off with `haru-pc muse off`; check with `haru-pc muse status`.
