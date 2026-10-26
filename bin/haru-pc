@@ -34,6 +34,7 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc skills [enable|disable <name>]
   haru-pc relay [on|off|status] connection: Haru relay (default, works anywhere) or off = direct/self-hosted only
   haru-pc relay url <wss://…>  use your own relay (deploy relay/ from the repo to your Cloudflare) — `default` to go back
+  haru-pc muse [off|rotate|status] let Meta Muse use Haru PC's read-only tools (one sentence to paste into Muse; only the HaruShare folder)
   haru-pc remote on|off        with the relay off: reach Haru PC away from home through your own Tailscale
   haru-pc update               update to the next tested version
   haru-pc uninstall            stop and remove Haru PC (settings stay in ~/.haru-pc)
@@ -230,6 +231,7 @@ case "$cmd" in
     else
       HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/relay-config.mjs" "$@" && oc gateway restart >/dev/null 2>&1 || true
     fi ;;
+  muse)      HARU_PC_HOME="$HARU_HOME" node "$HARU_HOME/app/plugin/muse-config.mjs" "$@" ;;
   remote)
     case "${1:-}" in
       on)  command -v tailscale >/dev/null || { say "Install Tailscale first: https://tailscale.com/download"; exit 1; }

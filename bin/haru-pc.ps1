@@ -193,6 +193,11 @@ Sign-ins happen on each company's own page. Haru PC never asks for your password
     if (-not $a1 -or $a1 -eq 'status') { & node $script status }
     else { & node $script @($Args_ | Select-Object -Skip 1); if ($LASTEXITCODE -eq 0) { try { Oc gateway restart | Out-Null } catch {} } }
   }
+  'muse' {
+    # Let Meta Muse use Haru PC's read-only tools: prints one sentence to paste into Muse's chat.
+    $env:HARU_PC_HOME = $HaruHome
+    & node (Join-Path $HaruHome 'app\plugin\muse-config.mjs') @($Args_ | Select-Object -Skip 1)
+  }
   'remote' {
     if ($a1 -eq 'on') {
       if (-not (Get-Command tailscale -ErrorAction SilentlyContinue)) { Say 'Install Tailscale first: https://tailscale.com/download'; exit 1 }
@@ -208,7 +213,7 @@ Haru PC — ask Haru on your phone, your computer does the work.
   haru-pc pair | approve | unpair | status | logs
   haru-pc model [choose | login chatgpt|claude|grok|copilot | key <provider> | local | free | check]
   haru-pc allow <folder> | readonly on|off | skills [enable|disable <name>]
-  haru-pc relay on|off|status|url <wss://…> | remote on|off | update | uninstall
+  haru-pc relay on|off|status|url <wss://…> | muse [off|rotate|status] | remote on|off | update | uninstall
 '@
   }
 }

@@ -108,6 +108,23 @@ Prefer to read the script first? Download [`install.sh`](install.sh) or [`instal
 
 ---
 
+## Connect Meta Muse (optional)
+
+Let a chat AI such as Meta Muse read a **shared folder** on your computer.
+
+```bash
+haru-pc muse
+```
+
+Paste the **one sentence** it prints (it is also copied to your clipboard) into Muse's chat. It contains a secret address only you know — don't send it to anyone.
+
+- Muse can only **read** the file list and text files (up to 64 KB) in `~/HaruShare` (`%USERPROFILE%\HaruShare` on Windows), and ask the current time. There is no tool that changes your computer or looks at other folders.
+- Unlike the phone connection, this link is **not** end-to-end encrypted (Muse can't hold our key), so only put files in the shared folder that you are fine showing to Muse.
+- If the address leaks: `haru-pc muse rotate` (new address, the old one stops at once). Turn it off with `haru-pc muse off`; check with `haru-pc muse status`.
+- Needs the Haru relay to be on (`haru-pc relay on`).
+
+---
+
 ## Choose your AI model
 
 Pick one when you install, and change it any time.
