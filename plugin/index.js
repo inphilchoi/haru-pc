@@ -14,6 +14,7 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { startRelayBridge } from "./relay-bridge.js";
 import { CHAIN_BLOCK_REASON, SETTINGS_BLOCK_REASON, isChainedCommand, touchesSafetySettings } from "./safety.js";
 import { TITLE_MAX, clip, describe, describeCommand } from "./cards.js";
@@ -66,6 +67,21 @@ function inside(child, parent) {
   return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
+// Skill instructions (SKILL.md and the files next to it) may be read from anywhere OpenClaw keeps
+// them — this plugin's own skills, the profile's plugin-skills, and OpenClaw's bundled skills —
+// but nothing else outside the allowed folders (the profile folder itself holds API keys).
+const SKILL_DIR = /[\\/](?:skills|plugin-skills|custodian-skills)[\\/]/i;
+function skillRoots() {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const roots = [path.join(here, "skills"), path.resolve(here, "..", "..", "plugin-skills")];
+  // OpenClaw's own package folder (…/node_modules/openclaw), found from the running script
+  let dir = path.dirname(process.argv[1] ?? "");
+  for (let i = 0; i < 6 && dir && path.dirname(dir) !== dir; i++, dir = path.dirname(dir)) {
+    if (path.basename(dir).toLowerCase() === "openclaw") { roots.push(dir); break; }
+  }
+  return roots.map((r) => path.resolve(r));
+}
+
 export default definePluginEntry({
   id: "haru-pc",
   name: "Haru PC",
@@ -79,9 +95,11 @@ export default definePluginEntry({
       .map((f) => path.resolve(expandHome(String(f))));
     const readOnly = cfg.readOnly === true;
 
+    const skillFolders = skillRoots();
+    const isSkillFile = (p) => SKILL_DIR.test(p) && skillFolders.some((r) => inside(p, r));
+
     api.on("before_tool_call", (event, ctx) => {
       const tool = String(event.toolName ?? "");
-      if (READ_ONLY_TOOLS.has(tool)) return;
       // Tool Search's tool_call only forwards to the real tool, and that final call comes back
       // through this hook with its own name and parameters — that is the card the phone sees.
       if (tool === "tool_call") return;
@@ -89,13 +107,17 @@ export default definePluginEntry({
 
       const base = ctx?.cwd ?? ctx?.workspaceDir ?? workspace ?? process.cwd();
       const paths = targetPaths(event, path.resolve(expandHome(String(base))));
-      const outside = paths.filter((p) => !folders.some((f) => inside(p, f)));
+      // Looking-only tools skip the card but not the folder limit (until 10/27 they skipped both,
+      // so `read C:\Windows\…\hosts` went through once code mode was off).
+      const lookOnly = READ_ONLY_TOOLS.has(tool);
+      const outside = paths.filter((p) => !folders.some((f) => inside(p, f)) && !(lookOnly && isSkillFile(p)));
       if (outside.length) {
         return {
           block: true,
           blockReason: `Outside the allowed folders: ${outside.slice(0, 3).join(", ")}. Allow a folder with \`haru-pc allow <folder>\`. (허용한 폴더 밖이라 막았어요)`,
         };
       }
+      if (lookOnly) return;
 
       if (EXEC_TOOLS.has(tool)) {
         // The AI must never widen its own limits (seen in testing: after a block it tried

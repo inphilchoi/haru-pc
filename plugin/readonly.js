@@ -5,9 +5,11 @@ import os from "node:os";
 import path from "node:path";
 import { commandText } from "./safety.js";
 
-/** OpenClaw "code mode" runs even skill reading as `exec` with a `code` string. Only plain
- *  `skills.list()` / `skills.read("name")` statements count — any other code needs the card. */
-const SKILL_STMT = /^(?:return\s+)?(?:await\s+)?skills\.(?:list\(\s*\)|read\(\s*(["'])[\w.-]{1,64}\1\s*\))\s*;?$/;
+/** OpenClaw "code mode" runs even skill reading and tool lookup as `exec` with a `code` string.
+ *  Only plain `skills.list()` / `skills.read("name")` / `catalog.search("words")` / `catalog.all()`
+ *  statements count (they only return names and text; calling a found tool is its own gated call)
+ *  — any other code needs the card. */
+const SKILL_STMT = /^(?:return\s+)?(?:await\s+)?(?:skills\.(?:list\(\s*\)|read\(\s*(["'])[\w.-]{1,64}\1\s*\))|catalog\.(?:all\(\s*\)|search\(\s*(["'])[\w .,:/가-힣-]{1,80}\2\s*\)))\s*;?$/;
 export function isSkillLookupCode(params) {
   const code = typeof params?.code === "string" ? params.code.trim() : "";
   if (!code || code.length > 600) return false;

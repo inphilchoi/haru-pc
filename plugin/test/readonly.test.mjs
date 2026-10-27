@@ -19,6 +19,15 @@ test("skill lookups in code mode need no card, other code does", () => {
   assert.equal(isSkillLookupCode({}), false);
 });
 
+test("tool catalog lookups in code mode need no card, using a found tool does", () => {
+  assert.ok(isSkillLookupCode({ code: 'catalog.search("terminal")' }));
+  assert.ok(isSkillLookupCode({ code: 'return await catalog.search("disk space C드라이브")' }));
+  assert.ok(isSkillLookupCode({ code: "return catalog.all()" }));
+  assert.equal(isSkillLookupCode({ code: '(await catalog.search("shell"))[0]({ command: "del x" })' }), false);
+  assert.equal(isSkillLookupCode({ code: 'catalog.search("a"); exec({ command: "rm -rf /" })' }), false);
+  assert.equal(isSkillLookupCode({ code: "catalog.search(q)" }), false);
+});
+
 test("info commands", () => {
   assert.ok(ro("Get-PSDrive C"));
   assert.ok(ro("Get-PSDrive -Name C"));
